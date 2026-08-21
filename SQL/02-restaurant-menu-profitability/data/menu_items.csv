@@ -1,0 +1,33 @@
+menu_item_id,item_name,category,price
+1,Edamame,Asian,5.0
+2,Korean Beef Bowl,Asian,12.95
+3,Tofu Pad Thai,Asian,11.95
+4,Chicken Fried Rice,Asian,10.95
+5,Pork Ramen,Asian,13.95
+6,Sushi Roll (8 pcs),Asian,14.95
+7,Miso Soup,Asian,4.5
+8,Hamburger,American,12.95
+9,Cheeseburger,American,13.95
+10,Hot Dog,American,9.95
+11,Mac & Cheese,American,10.95
+12,BBQ Ribs,American,17.95
+13,French Fries,American,4.95
+14,Chicken Wings,American,13.95
+15,Veggie Burger,American,11.95
+16,Eggplant Parmesan,Italian,15.95
+17,Spaghetti Bolognese,Italian,13.95
+18,Fettuccine Alfredo,Italian,13.95
+19,Cheese Lasagna,Italian,14.95
+20,Mushroom Ravioli,Italian,15.95
+21,Shrimp Scampi,Italian,18.95
+22,Margherita Pizza,Italian,13.95
+23,Meat Lovers Pizza,Italian,15.95
+24,Chips & Salsa,Mexican,7.95
+25,Chicken Burrito,Mexican,10.95
+26,Beef Burrito,Mexican,11.95
+27,Veggie Burrito,Mexican,9.95
+28,Steak Tacos,Mexican,13.95
+29,Chicken Tacos,Mexican,11.95
+30,Cheese Quesadillas,Mexican,9.95
+31,Nachos,Mexican,11.95
+32,Chicken Tortilla Soup,Mexican,7.95
