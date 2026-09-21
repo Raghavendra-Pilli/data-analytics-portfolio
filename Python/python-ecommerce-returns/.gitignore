@@ -1,0 +1,17 @@
+# Data files — download manually, see data/README.md
+data/*.csv
+data/*.xlsx
+data/*.parquet
+
+# Python
+*.pyc
+__pycache__/
+.ipynb_checkpoints/
+.env
+venv/
+.venv/
+
+# Outputs (keep folder, ignore generated files)
+outputs/charts/*.png
+outputs/reports/*.pdf
+outputs/*.html
