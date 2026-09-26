@@ -1,0 +1,119 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "7b2e9d4c1a6f3e8b5c02",
+  "displayName": "Deep Dive",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920,
+  "objects": {
+    "background": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F4F7FB'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "outspace": [
+      {
+        "properties": {
+          "color": {
+            "solid": {
+              "color": {
+                "expr": {
+                  "Literal": {
+                    "Value": "'#F4F7FB'"
+                  }
+                }
+              }
+            }
+          },
+          "transparency": {
+            "expr": {
+              "Literal": {
+                "Value": "0D"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "Filter50c99f2595e9109815f74a25",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Sample - Superstore"
+              }
+            },
+            "Property": "Region"
+          }
+        },
+        "type": "Categorical",
+        "howCreated": "Drillthrough"
+      }
+    ]
+  },
+  "pageBinding": {
+    "name": "Pod",
+    "type": "Drillthrough",
+    "parameters": [
+      {
+        "name": "Param_Filter50c99f2595e9109815f74a25",
+        "boundFilter": "Filter50c99f2595e9109815f74a25",
+        "fieldExpr": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Sample - Superstore"
+              }
+            },
+            "Property": "Region"
+          }
+        }
+      }
+    ]
+  },
+  "visualInteractions": [
+    {
+      "source": "e0bd22ca94fa3b891634",
+      "target": "91a29e25a15a084985d6",
+      "type": "NoFilter"
+    },
+    {
+      "source": "e0bd22ca94fa3b891634",
+      "target": "105e9d03f5d64378381d",
+      "type": "NoFilter"
+    },
+    {
+      "source": "e0bd22ca94fa3b891634",
+      "target": "e14ff117e58a5b5ffd1a",
+      "type": "NoFilter"
+    },
+    {
+      "source": "8dbe9dc3878ab469fadd",
+      "target": "86549568c191d6d7496f",
+      "type": "NoFilter"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+relationship Superstore_OrderDate_DimDate
+	fromColumn: 'Sample - Superstore'.'Order Date'
+	toColumn: Dim_Date.Date
+
+relationship Superstore_CustomerID_DimCustomer
+	fromColumn: 'Sample - Superstore'.'Customer ID'
+	toColumn: DimCustomer.'Customer ID'
+
+relationship Superstore_ShipDate_DimDate
+	isActive: false
+	fromColumn: 'Sample - Superstore'.'Ship Date'
+	toColumn: Dim_Date.Date
+
+relationship Superstore_State_StateGrid
+	fromColumn: 'Sample - Superstore'.State
+	toColumn: 'State Grid'.State
+

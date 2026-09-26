@@ -1,0 +1,130 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/report/3.3.0/schema.json",
+  "themeCollection": {
+    "baseTheme": {
+      "name": "CY26SU05",
+      "reportVersionAtImport": {
+        "visual": "2.9.0",
+        "report": "3.3.0",
+        "page": "2.3.1"
+      },
+      "type": "SharedResources"
+    },
+    "customTheme": {
+      "name": "RegionalExecutive-9cf38bac.json",
+      "reportVersionAtImport": {
+        "visual": "2.9.0",
+        "report": "3.3.0",
+        "page": "2.3.1"
+      },
+      "type": "RegisteredResources"
+    }
+  },
+  "objects": {
+    "outspacePane": [
+      {
+        "properties": {
+          "expanded": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "resourcePackages": [
+    {
+      "name": "SharedResources",
+      "type": "SharedResources",
+      "items": [
+        {
+          "name": "CY26SU05",
+          "path": "BaseThemes/CY26SU05.json",
+          "type": "BaseTheme"
+        }
+      ]
+    },
+    {
+      "name": "RegisteredResources",
+      "type": "RegisteredResources",
+      "items": [
+        {
+          "name": "icon-aov.svg",
+          "path": "icon-aov.svg",
+          "type": "Image"
+        },
+        {
+          "name": "icon-calendar.svg",
+          "path": "icon-calendar.svg",
+          "type": "Image"
+        },
+        {
+          "name": "icon-customers.svg",
+          "path": "icon-customers.svg",
+          "type": "Image"
+        },
+        {
+          "name": "icon-database.svg",
+          "path": "icon-database.svg",
+          "type": "Image"
+        },
+        {
+          "name": "icon-growth.svg",
+          "path": "icon-growth.svg",
+          "type": "Image"
+        },
+        {
+          "name": "icon-info.svg",
+          "path": "icon-info.svg",
+          "type": "Image"
+        },
+        {
+          "name": "icon-margin.svg",
+          "path": "icon-margin.svg",
+          "type": "Image"
+        },
+        {
+          "name": "icon-orders.svg",
+          "path": "icon-orders.svg",
+          "type": "Image"
+        },
+        {
+          "name": "icon-profit.svg",
+          "path": "icon-profit.svg",
+          "type": "Image"
+        },
+        {
+          "name": "icon-sales.svg",
+          "path": "icon-sales.svg",
+          "type": "Image"
+        },
+        {
+          "name": "icon-states.svg",
+          "path": "icon-states.svg",
+          "type": "Image"
+        },
+        {
+          "name": "icon-target.svg",
+          "path": "icon-target.svg",
+          "type": "Image"
+        },
+        {
+          "name": "RegionalExecutive-9cf38bac.json",
+          "path": "RegionalExecutive-9cf38bac.json",
+          "type": "CustomTheme"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "useStylableVisualContainerHeader": true,
+    "exportDataMode": "AllowSummarized",
+    "defaultDrillFilterOtherVisuals": true,
+    "allowChangeFilterTypes": true,
+    "useEnhancedTooltips": true,
+    "useDefaultAggregateDisplayName": true
+  }
+}

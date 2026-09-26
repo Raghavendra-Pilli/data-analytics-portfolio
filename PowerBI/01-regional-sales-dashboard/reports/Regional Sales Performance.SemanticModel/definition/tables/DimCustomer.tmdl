@@ -1,0 +1,75 @@
+/// Customer dimension. Grain: one row per Customer ID. Name/Segment taken from the customer's most recent order. Geography is deliberately excluded (it describes the order's ship-to location, not the customer). An 'UNKNOWN' member is added only if the fact contains blank Customer IDs.
+table DimCustomer
+	lineageTag: 1ea170a1-fe88-4a2a-a463-f10bcfbb7819
+
+	/// Business key (trimmed, upper-case). One row per value.
+	column 'Customer ID'
+		dataType: string
+		isNullable: false
+		lineageTag: 13bff02c-849b-4b82-89b4-e22f51fc914b
+		summarizeBy: none
+		sourceColumn: Customer ID
+
+	/// Name on the customer's most recent order.
+	column 'Customer Name'
+		dataType: string
+		lineageTag: 02b2dc95-e81c-49a2-9f0a-ce8560342bc6
+		sourceColumn: Customer Name
+
+	/// Consumer / Corporate / Home Office - from the customer's most recent order.
+	column Segment
+		dataType: string
+		lineageTag: c16eb190-1c8b-400a-9f25-0d8c559c26ea
+		sourceColumn: Segment
+
+	/// Date of the customer's first order in the dataset. Attribute only - not related to Dim_Date.
+	column 'First Order Date'
+		dataType: dateTime
+		formatString: dd-mmm-yyyy
+		displayFolder: Acquisition
+		lineageTag: e5f33c85-803f-4a13-8bb9-6b1cab64d439
+		summarizeBy: none
+		sourceColumn: First Order Date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Acquisition cohort year (year of first order).
+	column 'First Order Year'
+		dataType: int64
+		formatString: 0
+		displayFolder: Acquisition
+		lineageTag: 1c468d42-f4d4-4f3e-be5f-7ecdadf13308
+		summarizeBy: none
+		sourceColumn: First Order Year
+
+	partition DimCustomer = m
+		mode: import
+		source =
+				let
+				  Source = stg_Superstore,
+				  SelectedCols = Table.SelectColumns(Source, {"Customer ID", "Customer Name", "Segment", "Order Date"}),
+				  // Standardise key (trim + upper-case) and trim text attributes - same key rule as the fact table
+				  Cleaned = Table.TransformColumns(SelectedCols, {
+				    {"Customer ID", each if _ = null then "" else Text.Upper(Text.Trim(_)), type text},
+				    {"Customer Name", each if _ = null then null else Text.Trim(_), type nullable text},
+				    {"Segment", each if _ = null then null else Text.Trim(_), type nullable text}}),
+				  HasBlankIDs = List.Contains(Cleaned[Customer ID], ""),
+				  ValidRows = Table.SelectRows(Cleaned, each [Customer ID] <> ""),
+				  // One row per customer: Name/Segment from the latest order, plus first order date
+				  Grouped = Table.Group(ValidRows, {"Customer ID"}, {
+				    {"Latest", each Table.Max(_, "Order Date"), type record},
+				    {"First Order Date", each List.Min([Order Date]), type date}}),
+				  Expanded = Table.ExpandRecordColumn(Grouped, "Latest", {"Customer Name", "Segment"}),
+				  FilledNulls = Table.TransformColumns(Expanded, {
+				    {"Customer Name", each if _ = null or _ = "" then "(Name not recorded)" else _, type text},
+				    {"Segment", each if _ = null or _ = "" then "Unknown" else _, type text}}),
+				  // Unknown member only when the fact actually has blank Customer IDs
+				  WithUnknown = if HasBlankIDs
+				    then Table.InsertRows(FilledNulls, 0, {[#"Customer ID" = "UNKNOWN", #"First Order Date" = null, #"Customer Name" = "Unknown Customer", Segment = "Unknown"]})
+				    else FilledNulls,
+				  AddedCohort = Table.AddColumn(WithUnknown, "First Order Year", each if [First Order Date] = null then null else Date.Year([First Order Date]), Int64.Type),
+				  Ordered = Table.SelectColumns(AddedCohort, {"Customer ID", "Customer Name", "Segment", "First Order Date", "First Order Year"}),
+				  Typed = Table.TransformColumnTypes(Ordered, {{"Customer ID", type text}, {"Customer Name", type text}, {"Segment", type text}, {"First Order Date", type date}, {"First Order Year", Int64.Type}})
+				in
+				  Typed
+

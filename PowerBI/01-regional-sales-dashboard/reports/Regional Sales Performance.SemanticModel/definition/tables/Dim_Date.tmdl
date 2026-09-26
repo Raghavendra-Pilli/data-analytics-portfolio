@@ -1,0 +1,465 @@
+/// Calendar dimension for the Regional Sales Performance Dashboard. Range = full calendar years from the first Order Date to the last Order/Ship Date (derived dynamically). Fiscal year starts in April (change _FYStartMonth). Offsets and flags are relative to the last Order Date.
+table Dim_Date
+	lineageTag: 76cb7f7e-c023-4980-addb-126d8afd2662
+	dataCategory: Time
+
+	column Date
+		isUnique
+		formatString: dd-mmm-yyyy
+		displayFolder: Calendar
+		lineageTag: 3579a6a9-f9d0-4223-abb3-e129650c35f9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+	column 'Date Key'
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		lineageTag: da7e8102-2cba-49c4-aed4-487b5a48766e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date Key]
+
+	column Year
+		formatString: 0
+		displayFolder: Calendar
+		lineageTag: 4668f894-7342-4aca-bd3d-d9d07685265e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year]
+
+	column 'Quarter Number'
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		lineageTag: da9bdd47-41b2-4b94-9935-8d99428f8eee
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Quarter Number]
+
+	column Quarter
+		displayFolder: Calendar
+		lineageTag: 555738cc-003c-4f48-8db9-96be216f35ef
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Quarter]
+		sortByColumn: 'Quarter Number'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Year Quarter'
+		displayFolder: Calendar
+		lineageTag: fe78ae17-994d-4773-8b53-227a7172c0b7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year Quarter]
+		sortByColumn: 'Year Quarter Key'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Year Quarter Key'
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		lineageTag: d8d3c665-a96c-4ca1-8368-99bd20d6557d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year Quarter Key]
+
+	column 'Month Number'
+		formatString: 0
+		displayFolder: Calendar
+		lineageTag: 056aed65-7b42-430f-b282-a31e380f263c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Number]
+
+	column 'Month Name'
+		displayFolder: Calendar
+		lineageTag: 68bcf644-db7c-43fe-a9fa-7ed723e1523d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Name]
+		sortByColumn: 'Month Number'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Short'
+		displayFolder: Calendar
+		lineageTag: 5fe12412-26db-40ad-b910-8241c85282cd
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Short]
+		sortByColumn: 'Month Number'
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year-Month
+		displayFolder: Calendar
+		lineageTag: cd377a25-d8d6-40d8-81e3-70cba0b19f39
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year-Month]
+		sortByColumn: 'Year Month Key'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Year'
+		displayFolder: Calendar
+		lineageTag: 6f0ac352-99e1-4ad3-866b-88619722f222
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Year]
+		sortByColumn: 'Year Month Key'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Year Month Key'
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		lineageTag: 8f4649ff-e03e-44ab-aa72-826389661b60
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year Month Key]
+
+	column 'Month Start'
+		formatString: dd-mmm-yyyy
+		displayFolder: Calendar
+		lineageTag: a6ea4d7e-d557-4be8-a290-3ed9b968db2c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Start]
+
+	column 'Month End'
+		formatString: dd-mmm-yyyy
+		displayFolder: Calendar
+		lineageTag: 403cf850-796c-42b4-a4e9-15c5b6d922c1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month End]
+
+	column 'ISO Year'
+		formatString: 0
+		displayFolder: Week
+		lineageTag: 6efa9330-cb97-4397-b0c4-926b18b7ede5
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [ISO Year]
+
+	column 'ISO Week'
+		formatString: 0
+		displayFolder: Week
+		lineageTag: d8b054c4-8404-4cb1-a98d-91d3492dc3b4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [ISO Week]
+
+	column 'Year Week'
+		displayFolder: Week
+		lineageTag: 60e39f50-7865-45a1-9802-70e023ed4d2e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year Week]
+		sortByColumn: 'Year Week Key'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Year Week Key'
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		lineageTag: 91e0c799-b6ed-444a-90c8-5d0f795db981
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year Week Key]
+
+	column 'Week Start'
+		formatString: dd-mmm-yyyy
+		displayFolder: Week
+		lineageTag: 5f86f9f1-3511-4b50-bfa4-2e8d1d18f02f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Week Start]
+
+	column Day
+		formatString: 0
+		displayFolder: Day
+		lineageTag: 250e70c4-1588-4ef8-b8e2-9a8febc306e0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Day]
+
+	column 'Day of Week Number'
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		lineageTag: f2f012cc-ae0b-4428-be81-a44da1d1b46c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Day of Week Number]
+
+	column 'Day Name'
+		displayFolder: Day
+		lineageTag: a3e1caa9-b79f-47b8-8eaf-1f34b8692a5e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Day Name]
+		sortByColumn: 'Day of Week Number'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Day Short'
+		displayFolder: Day
+		lineageTag: 91bbda66-8d98-499d-a7f5-a6fd442408e4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Day Short]
+		sortByColumn: 'Day of Week Number'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Day of Year'
+		formatString: 0
+		displayFolder: Day
+		lineageTag: d557ac49-5ebd-4924-99da-d25a664d1e7e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Day of Year]
+
+	column 'Is Weekend'
+		displayFolder: Flags
+		lineageTag: c565b9af-5f5c-42e0-8503-008f5fb92c5d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Is Weekend]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fiscal Year'
+		displayFolder: Fiscal
+		lineageTag: ce1155f2-07f7-4093-8326-5d6a4de81897
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Fiscal Year]
+		sortByColumn: 'Fiscal Year Start'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fiscal Year Start'
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		lineageTag: 411ca589-1802-4ef5-a351-fbbd8182dbf7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Fiscal Year Start]
+
+	column 'Fiscal Quarter Number'
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		lineageTag: 9621d534-1eff-4ef9-a776-df6afdc87fcb
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Fiscal Quarter Number]
+
+	column 'Fiscal Quarter'
+		displayFolder: Fiscal
+		lineageTag: 64b0e458-762c-4886-839a-c1b8455376dd
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Fiscal Quarter]
+		sortByColumn: 'Fiscal Quarter Number'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fiscal Year Quarter'
+		displayFolder: Fiscal
+		lineageTag: 379fd72e-92ad-49eb-83af-906eecfc15f4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Fiscal Year Quarter]
+		sortByColumn: 'Fiscal Year Quarter Key'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Fiscal Year Quarter Key'
+		isHidden
+		formatString: 0
+		displayFolder: Keys
+		lineageTag: de8ead5e-0b92-4ff4-98d9-098f8c70d532
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Fiscal Year Quarter Key]
+
+	column 'Fiscal Month Number'
+		formatString: 0
+		displayFolder: Fiscal
+		lineageTag: 8c1fc4d8-4ccb-4462-9b6c-2be1b1aa8c25
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Fiscal Month Number]
+
+	column 'Is Order Period'
+		displayFolder: Flags
+		lineageTag: f55586a1-0a55-460b-9cbf-4d6446a80154
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Is Order Period]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Future'
+		displayFolder: Flags
+		lineageTag: 629e5a6d-6b03-4e58-8af5-154728fbd475
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Is Future]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is YTD Comparable'
+		displayFolder: Flags
+		lineageTag: 60f0aa7a-1788-4df3-bf4a-7760b28971a6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Is YTD Comparable]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Year Offset'
+		formatString: 0
+		displayFolder: Relative Offsets
+		lineageTag: 3ca1ac5d-d406-4bf6-8829-295c3539699a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Year Offset]
+
+	column 'Quarter Offset'
+		formatString: 0
+		displayFolder: Relative Offsets
+		lineageTag: 860bcb64-8a17-4597-acfb-d2cfc337942a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Quarter Offset]
+
+	column 'Month Offset'
+		formatString: 0
+		displayFolder: Relative Offsets
+		lineageTag: 54e5fddd-ad72-4cce-a109-d7ee66a4221e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Month Offset]
+
+	column 'Day Offset'
+		formatString: 0
+		displayFolder: Relative Offsets
+		lineageTag: defae28f-9ca2-40e5-a1ff-e339ea929530
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Day Offset]
+
+	hierarchy 'Calendar Hierarchy'
+		lineageTag: 5f31c765-f9b9-4f2f-84d4-e5e5b1ac5846
+
+		level Year
+			lineageTag: 1f5a6bea-fd6a-4df5-ae67-4459fc66ce26
+			column: Year
+
+		level Quarter
+			lineageTag: 2ba140b6-2fa5-4708-85f3-84db294584bd
+			column: Quarter
+
+		level Month
+			lineageTag: 30765d1e-aed1-4c1f-b283-46cfa29f4c66
+			column: 'Month Name'
+
+		level Date
+			lineageTag: 424fdb86-78f8-4081-b065-5bd11c0179b1
+			column: Date
+
+	hierarchy 'Fiscal Hierarchy'
+		lineageTag: 80c0203c-5314-4a16-adde-3de81bcd918d
+
+		level 'Fiscal Year'
+			lineageTag: eefee828-dfa1-45e1-bb89-f3b35ffdea92
+			column: 'Fiscal Year'
+
+		level 'Fiscal Quarter'
+			lineageTag: f04d5474-54ca-4c38-b2e4-65c97f09cc8a
+			column: 'Fiscal Quarter'
+
+		level Month
+			lineageTag: 77d8ea15-dd7a-47e2-931c-e089aefc9f72
+			column: 'Month Name'
+
+		level Date
+			lineageTag: ba0e0397-2a7c-440a-ae2e-1829b7d43940
+			column: Date
+
+	partition Dim_Date = calculated
+		mode: import
+		source =
+				VAR _FirstOrderDate = MIN ( 'Sample - Superstore'[Order Date] )
+				VAR _LastOrderDate  = MAX ( 'Sample - Superstore'[Order Date] )
+				VAR _LastAnyDate    = MAX ( _LastOrderDate, MAX ( 'Sample - Superstore'[Ship Date] ) )
+				VAR _FYStartMonth   = 4    -- Fiscal year start month (4 = April)
+				VAR _Base = CALENDAR ( DATE ( YEAR ( _FirstOrderDate ), 1, 1 ), DATE ( YEAR ( _LastAnyDate ), 12, 31 ) )
+				RETURN
+				GENERATE ( _Base,
+				  VAR d   = [Date]
+				  VAR y   = YEAR ( d )
+				  VAR m   = MONTH ( d )
+				  VAR q   = QUARTER ( d )
+				  VAR dow = WEEKDAY ( d, 2 )                 -- Monday = 1
+				  VAR isoYear = YEAR ( d - dow + 4 )         -- year of the week's Thursday
+				  VAR isoWeek = WEEKNUM ( d, 21 )
+				  VAR fyStart = IF ( m >= _FYStartMonth, y, y - 1 )
+				  VAR fm  = MOD ( m - _FYStartMonth, 12 ) + 1
+				  VAR fq  = INT ( ( fm - 1 ) / 3 ) + 1
+				  VAR fyLabel = "FY" & fyStart & "-" & RIGHT ( fyStart + 1, 2 )
+				  RETURN ROW (
+				    "Date Key", y * 10000 + m * 100 + DAY ( d ),
+				    "Year", y,
+				    "Quarter Number", q,
+				    "Quarter", "Q" & q,
+				    "Year Quarter", y & "-Q" & q,
+				    "Year Quarter Key", y * 10 + q,
+				    "Month Number", m,
+				    "Month Name", FORMAT ( d, "mmmm" ),
+				    "Month Short", FORMAT ( d, "mmm" ),
+				    "Year-Month", FORMAT ( d, "yyyy-mm" ),
+				    "Month Year", FORMAT ( d, "mmm yyyy" ),
+				    "Year Month Key", y * 100 + m,
+				    "Month Start", DATE ( y, m, 1 ),
+				    "Month End", EOMONTH ( d, 0 ),
+				    "ISO Year", isoYear,
+				    "ISO Week", isoWeek,
+				    "Year Week", isoYear & "-W" & FORMAT ( isoWeek, "00" ),
+				    "Year Week Key", isoYear * 100 + isoWeek,
+				    "Week Start", d - dow + 1,
+				    "Day", DAY ( d ),
+				    "Day of Week Number", dow,
+				    "Day Name", FORMAT ( d, "dddd" ),
+				    "Day Short", FORMAT ( d, "ddd" ),
+				    "Day of Year", INT ( d - DATE ( y, 1, 1 ) ) + 1,
+				    "Is Weekend", dow >= 6,
+				    "Fiscal Year", fyLabel,
+				    "Fiscal Year Start", fyStart,
+				    "Fiscal Quarter Number", fq,
+				    "Fiscal Quarter", "FQ" & fq,
+				    "Fiscal Year Quarter", fyLabel & " FQ" & fq,
+				    "Fiscal Year Quarter Key", fyStart * 10 + fq,
+				    "Fiscal Month Number", fm,
+				    "Is Order Period", d >= _FirstOrderDate && d <= _LastOrderDate,
+				    "Is Future", d > _LastOrderDate,
+				    "Is YTD Comparable", m * 100 + DAY ( d ) <= MONTH ( _LastOrderDate ) * 100 + DAY ( _LastOrderDate ),
+				    "Year Offset", y - YEAR ( _LastOrderDate ),
+				    "Quarter Offset", ( y - YEAR ( _LastOrderDate ) ) * 4 + q - QUARTER ( _LastOrderDate ),
+				    "Month Offset", ( y - YEAR ( _LastOrderDate ) ) * 12 + m - MONTH ( _LastOrderDate ),
+				    "Day Offset", INT ( d - _LastOrderDate )
+				  )
+				)
+

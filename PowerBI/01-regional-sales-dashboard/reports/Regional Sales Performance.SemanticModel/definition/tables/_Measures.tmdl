@@ -1,0 +1,1021 @@
+/// Home table for all report measures. Contains no data.
+table _Measures
+	lineageTag: 7aa26637-7339-45c5-9666-9b9445c4a756
+
+	/// Latest Order Date in the dataset, ignoring all filters. Anchor for 'as-of' logic (YTD, LY, future-date blanking).
+	measure 'Last Order Date' = CALCULATE ( MAX ( 'Sample - Superstore'[Order Date] ), REMOVEFILTERS () )
+		formatString: dd-mmm-yyyy
+		isHidden
+		displayFolder: 99 Helpers
+		lineageTag: e50b0850-125f-47c7-a429-7746d4b869b9
+
+	/// Earliest Order Date in the dataset, ignoring all filters.
+	measure 'First Order Date' = CALCULATE ( MIN ( 'Sample - Superstore'[Order Date] ), REMOVEFILTERS () )
+		formatString: dd-mmm-yyyy
+		isHidden
+		displayFolder: 99 Helpers
+		lineageTag: 3f81d294-151b-4d15-9dbe-5b1ef7be7b75
+
+	/// Sum of line-level Sales (after discount).
+	measure 'Total Sales' = SUM ( 'Sample - Superstore'[Sales] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 01 Core
+		lineageTag: 3975d1a3-1094-4502-a9ec-de94d124c3f6
+
+	/// Sum of line-level Profit. Can be negative.
+	measure 'Total Profit' = SUM ( 'Sample - Superstore'[Profit] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 01 Core
+		lineageTag: 96ac6e02-5666-48b3-9294-2f3121a4836e
+
+	/// Units sold.
+	measure 'Total Quantity' = SUM ( 'Sample - Superstore'[Quantity] )
+		formatString: #,0
+		displayFolder: 01 Core
+		lineageTag: c9f6dfe7-cc07-4138-89d9-e6ec5ae85ed8
+
+	/// Distinct Order IDs. An order can contain several lines.
+	measure 'Total Orders' = DISTINCTCOUNT ( 'Sample - Superstore'[Order ID] )
+		formatString: #,0
+		displayFolder: 01 Core
+		lineageTag: 022d0e1a-5ddc-48db-9a94-e48aae936e56
+
+	/// Distinct customers who ordered in the current context (active buyers, not all customers in DimCustomer). Not additive across regions: a customer buying in two regions counts once in the total.
+	measure 'Unique Customers' = DISTINCTCOUNT ( 'Sample - Superstore'[Customer ID] )
+		formatString: #,0
+		displayFolder: 01 Core
+		lineageTag: 80872f1e-e06d-4242-a377-3fc5dfc8e043
+
+	/// Total Profit / Total Sales.
+	measure 'Profit Margin %' = DIVIDE ( [Total Profit], [Total Sales] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 02 Ratios
+		lineageTag: fc8e48c5-c5ec-4e84-a735-9c3b57a58101
+
+	/// Total Sales / Total Orders.
+	measure 'Average Order Value' = DIVIDE ( [Total Sales], [Total Orders] )
+		formatString: \$#,0.00
+		displayFolder: 02 Ratios
+		lineageTag: 83223f5b-84d2-4bd7-b55a-39efb94c6707
+
+	/// Calendar year-to-date Sales up to the last date in context, capped at the last order date. With no date filter it returns the latest year's YTD. Blank for future periods.
+	measure 'Sales YTD' =
+			VAR _Last = [Last Order Date]
+			RETURN
+			    IF (
+			        MIN ( Dim_Date[Date] ) > _Last,
+			        BLANK (),
+			        CALCULATE (
+			            [Total Sales],
+			            DATESYTD ( FILTER ( VALUES ( Dim_Date[Date] ), Dim_Date[Date] <= _Last ) )
+			        )
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 03 Time Intelligence
+		lineageTag: 9b656456-4499-4a99-b1e4-31e9f9df0b39
+
+	/// Sales for the same period one year earlier, like-for-like: only dates up to the last order date are shifted back. Blank for future periods and for contexts longer than one year.
+	measure 'Sales LY' =
+			VAR _Last = [Last Order Date]
+			VAR _Min = MIN ( Dim_Date[Date] )
+			VAR _Max = MAX ( Dim_Date[Date] )
+			RETURN
+			    IF (
+			        _Min > _Last || INT ( _Max - _Min ) > 366,
+			        BLANK (),
+			        CALCULATE (
+			            [Total Sales],
+			            DATEADD ( FILTER ( VALUES ( Dim_Date[Date] ), Dim_Date[Date] <= _Last ), -1, YEAR )
+			        )
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 03 Time Intelligence
+		lineageTag: 6fc2f4cc-119e-4cc4-9207-9c3af9ddce0c
+
+	/// Profit for the same period one year earlier (like-for-like, see Sales LY).
+	measure 'Profit LY' =
+			VAR _Last = [Last Order Date]
+			VAR _Min = MIN ( Dim_Date[Date] )
+			VAR _Max = MAX ( Dim_Date[Date] )
+			RETURN
+			    IF (
+			        _Min > _Last || INT ( _Max - _Min ) > 366,
+			        BLANK (),
+			        CALCULATE (
+			            [Total Profit],
+			            DATEADD ( FILTER ( VALUES ( Dim_Date[Date] ), Dim_Date[Date] <= _Last ), -1, YEAR )
+			        )
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 03 Time Intelligence
+		lineageTag: ec5b805d-6727-40d4-9ff8-eae56cea71fa
+
+	/// Active customers in the same period one year earlier (like-for-like, see Sales LY).
+	measure 'Unique Customers LY' =
+			VAR _Last = [Last Order Date]
+			VAR _Min = MIN ( Dim_Date[Date] )
+			VAR _Max = MAX ( Dim_Date[Date] )
+			RETURN
+			    IF (
+			        _Min > _Last || INT ( _Max - _Min ) > 366,
+			        BLANK (),
+			        CALCULATE (
+			            [Unique Customers],
+			            DATEADD ( FILTER ( VALUES ( Dim_Date[Date] ), Dim_Date[Date] <= _Last ), -1, YEAR )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 03 Time Intelligence
+		lineageTag: 4bc574c5-076c-488c-a043-038ad96f0c71
+
+	/// Sales over the 12 months ending on the last date in context. Blank when the 12-month window would start before the first month of data (incomplete window) or for future periods.
+	measure 'Rolling 12M Sales' =
+			VAR _Last = [Last Order Date]
+			VAR _First = [First Order Date]
+			VAR _End = MAX ( Dim_Date[Date] )
+			VAR _WindowStart = EDATE ( _End, -12 ) + 1
+			RETURN
+			    IF (
+			        MIN ( Dim_Date[Date] ) > _Last
+			            || _WindowStart < DATE ( YEAR ( _First ), MONTH ( _First ), 1 ),
+			        BLANK (),
+			        CALCULATE ( [Total Sales], DATESINPERIOD ( Dim_Date[Date], _End, -12, MONTH ) )
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 03 Time Intelligence
+		lineageTag: 9b846553-b290-400c-a8f7-4bf87e7e1601
+
+	/// (Total Sales - Sales LY) / Sales LY. Blank when there is no prior-year baseline.
+	measure 'Sales YoY %' =
+			VAR _LY = [Sales LY]
+			RETURN
+			    IF ( NOT ISBLANK ( _LY ), DIVIDE ( [Total Sales] - _LY, _LY ) )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 04 Growth
+		lineageTag: 64028a74-9618-4c29-89e6-0c5e41223d2c
+
+	/// (Total Profit - Profit LY) / ABS(Profit LY). ABS keeps the sign meaningful when last year's profit was negative.
+	measure 'Profit YoY %' =
+			VAR _LY = [Profit LY]
+			RETURN
+			    IF ( NOT ISBLANK ( _LY ), DIVIDE ( [Total Profit] - _LY, ABS ( _LY ) ) )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 04 Growth
+		lineageTag: 88845050-9101-4d81-903b-bad2df570b46
+
+	/// (Unique Customers - Unique Customers LY) / Unique Customers LY.
+	measure 'Customer YoY %' =
+			VAR _LY = [Unique Customers LY]
+			RETURN
+			    IF ( NOT ISBLANK ( _LY ), DIVIDE ( [Unique Customers] - _LY, _LY ) )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 04 Growth
+		lineageTag: c65a4257-00cb-481e-85b9-8c5d17bf4484
+
+	/// Compound annual growth rate (CAGR) of Sales from the first complete calendar year in the data to the latest selected complete year, for the current geography/segment/product context. Ignores month/day filters (annual measure). Blank if fewer than 2 complete years or for future years.
+	measure 'Regional Growth %' =
+			VAR _First = [First Order Date]
+			VAR _Last = [Last Order Date]
+			VAR _FirstFullYear = IF ( MONTH ( _First ) = 1, YEAR ( _First ), YEAR ( _First ) + 1 )
+			VAR _LastFullYear = IF ( MONTH ( _Last ) = 12, YEAR ( _Last ), YEAR ( _Last ) - 1 )
+			VAR _EndYear = MIN ( MAX ( Dim_Date[Year] ), _LastFullYear )
+			VAR _N = _EndYear - _FirstFullYear
+			VAR _S0 = CALCULATE ( [Total Sales], REMOVEFILTERS ( Dim_Date ), Dim_Date[Year] = _FirstFullYear )
+			VAR _S1 = CALCULATE ( [Total Sales], REMOVEFILTERS ( Dim_Date ), Dim_Date[Year] = _EndYear )
+			RETURN
+			    IF (
+			        MIN ( Dim_Date[Date] ) <= _Last && _N >= 1 && _S0 > 0 && NOT ISBLANK ( _S1 ),
+			        ( _S1 / _S0 ) ^ ( 1 / _N ) - 1
+			    )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 04 Growth
+		lineageTag: b2da47eb-daac-46f3-a68c-0e7dbf464291
+
+	/// Share of Sales vs the total of everything selected by slicers/filters (ALLSELECTED). Sums to 100% within a visual.
+	measure 'Sales Contribution %' = DIVIDE ( [Total Sales], CALCULATE ( [Total Sales], ALLSELECTED () ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 05 Contribution
+		lineageTag: 693b1269-b62c-4317-8ae0-d42b0efa1185
+
+	/// Share of Profit vs the selected total (ALLSELECTED). Loss-making members show negative shares and others can exceed 100%.
+	measure 'Profit Contribution %' = DIVIDE ( [Total Profit], CALCULATE ( [Total Profit], ALLSELECTED () ) )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 05 Contribution
+		lineageTag: 6c5087bd-4b85-4f52-b482-82b5f65919a2
+
+	/// Total Sales with all geography filters removed (other slicers such as date, segment and category still apply). The benchmark every location is compared against. Update REMOVEFILTERS when DimGeography is introduced.
+	measure 'Company Sales' =
+			CALCULATE (
+			    [Total Sales],
+			    REMOVEFILTERS (
+			        'Sample - Superstore'[Country], 'Sample - Superstore'[Region], 'Sample - Superstore'[State],
+			        'Sample - Superstore'[City], 'Sample - Superstore'[Postal Code]
+			    ),
+			    REMOVEFILTERS ( 'State Grid' )
+			)
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: d23838f8-a11f-4ff6-8932-4d022c9c2b30
+
+	/// Sales LY with geography filters removed.
+	measure 'Company Sales LY' =
+			CALCULATE (
+			    [Sales LY],
+			    REMOVEFILTERS (
+			        'Sample - Superstore'[Country], 'Sample - Superstore'[Region], 'Sample - Superstore'[State],
+			        'Sample - Superstore'[City], 'Sample - Superstore'[Postal Code]
+			    ),
+			    REMOVEFILTERS ( 'State Grid' )
+			)
+		formatString: \$#,0;(\$#,0);\$#,0
+		isHidden
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: bf5d38ff-77a5-447b-a965-aef8d6b2cb9b
+
+	/// Profit Margin % with geography filters removed.
+	measure 'Company Profit Margin %' =
+			CALCULATE (
+			    [Profit Margin %],
+			    REMOVEFILTERS (
+			        'Sample - Superstore'[Country], 'Sample - Superstore'[Region], 'Sample - Superstore'[State],
+			        'Sample - Superstore'[City], 'Sample - Superstore'[Postal Code]
+			    ),
+			    REMOVEFILTERS ( 'State Grid' )
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: 2bbef854-a0bd-4da7-8a95-8f182eaad9b4
+
+	/// Sales YoY % with geography filters removed.
+	measure 'Company Sales YoY %' =
+			CALCULATE (
+			    [Sales YoY %],
+			    REMOVEFILTERS (
+			        'Sample - Superstore'[Country], 'Sample - Superstore'[Region], 'Sample - Superstore'[State],
+			        'Sample - Superstore'[City], 'Sample - Superstore'[Postal Code]
+			    ),
+			    REMOVEFILTERS ( 'State Grid' )
+			)
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: cf0b6dfc-caf2-4a7b-be21-28ca64cf6d74
+
+	/// Regional Growth % (sales CAGR) with geography filters removed.
+	measure 'Company Sales Growth %' =
+			CALCULATE (
+			    [Regional Growth %],
+			    REMOVEFILTERS (
+			        'Sample - Superstore'[Country], 'Sample - Superstore'[Region], 'Sample - Superstore'[State],
+			        'Sample - Superstore'[City], 'Sample - Superstore'[Postal Code]
+			    ),
+			    REMOVEFILTERS ( 'State Grid' )
+			)
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: aaba2b30-169f-47fa-b1af-43d7de63c58f
+
+	/// CAGR of Profit from the first complete year to the latest selected complete year (same window as Regional Growth %). Blank when profit in either end year is zero or negative (CAGR undefined for losses). CAUTION: a very small base-year profit produces extreme rates (e.g. Central 2014 profit $540 -> +141%/yr); always read alongside Total Profit and Profit Margin %.
+	measure 'Profit Growth %' =
+			VAR _First = [First Order Date]
+			VAR _Last = [Last Order Date]
+			VAR _FirstFullYear = IF ( MONTH ( _First ) = 1, YEAR ( _First ), YEAR ( _First ) + 1 )
+			VAR _LastFullYear = IF ( MONTH ( _Last ) = 12, YEAR ( _Last ), YEAR ( _Last ) - 1 )
+			VAR _EndYear = MIN ( MAX ( Dim_Date[Year] ), _LastFullYear )
+			VAR _N = _EndYear - _FirstFullYear
+			VAR _P0 = CALCULATE ( [Total Profit], REMOVEFILTERS ( Dim_Date ), Dim_Date[Year] = _FirstFullYear )
+			VAR _P1 = CALCULATE ( [Total Profit], REMOVEFILTERS ( Dim_Date ), Dim_Date[Year] = _EndYear )
+			RETURN
+			    IF (
+			        MIN ( Dim_Date[Date] ) <= _Last && _N >= 1 && _P0 > 0 && _P1 > 0,
+			        ( _P1 / _P0 ) ^ ( 1 / _N ) - 1
+			    )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 06 Growth Analysis
+		lineageTag: 30fc5a56-2871-4295-842e-758b16a4b4df
+
+	/// CAGR of active (ordering) customers from the first complete year to the latest selected complete year. Measures growth of the buyer base in the location.
+	measure 'Customer Growth %' =
+			VAR _First = [First Order Date]
+			VAR _Last = [Last Order Date]
+			VAR _FirstFullYear = IF ( MONTH ( _First ) = 1, YEAR ( _First ), YEAR ( _First ) + 1 )
+			VAR _LastFullYear = IF ( MONTH ( _Last ) = 12, YEAR ( _Last ), YEAR ( _Last ) - 1 )
+			VAR _EndYear = MIN ( MAX ( Dim_Date[Year] ), _LastFullYear )
+			VAR _N = _EndYear - _FirstFullYear
+			VAR _C0 = CALCULATE ( [Unique Customers], REMOVEFILTERS ( Dim_Date ), Dim_Date[Year] = _FirstFullYear )
+			VAR _C1 = CALCULATE ( [Unique Customers], REMOVEFILTERS ( Dim_Date ), Dim_Date[Year] = _EndYear )
+			RETURN
+			    IF (
+			        MIN ( Dim_Date[Date] ) <= _Last && _N >= 1 && _C0 > 0 && NOT ISBLANK ( _C1 ),
+			        ( _C1 / _C0 ) ^ ( 1 / _N ) - 1
+			    )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 06 Growth Analysis
+		lineageTag: f56381f4-4555-4245-9e4b-7ecbc97c6d23
+
+	/// Profit Growth % with geography filters removed.
+	measure 'Company Profit Growth %' =
+			CALCULATE (
+			    [Profit Growth %],
+			    REMOVEFILTERS (
+			        'Sample - Superstore'[Country], 'Sample - Superstore'[Region], 'Sample - Superstore'[State],
+			        'Sample - Superstore'[City], 'Sample - Superstore'[Postal Code]
+			    ),
+			    REMOVEFILTERS ( 'State Grid' )
+			)
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: 707e1732-cb86-46fd-82ac-6a2e6ae901c4
+
+	/// Benchmark buyer-base CAGR, comparable with location values: counts customer-location pairs at the geography level currently in scope (Region, State or City), with geography filters removed. A customer ordering in 3 regions counts 3 times at Region level - exactly as the regions themselves count them. With no geography in scope it is the plain distinct-customer CAGR.
+	measure 'Company Customer Growth %' =
+			VAR _First = [First Order Date]
+			VAR _Last = [Last Order Date]
+			VAR _FirstFullYear = IF ( MONTH ( _First ) = 1, YEAR ( _First ), YEAR ( _First ) + 1 )
+			VAR _LastFullYear = IF ( MONTH ( _Last ) = 12, YEAR ( _Last ), YEAR ( _Last ) - 1 )
+			VAR _EndYear = MIN ( MAX ( Dim_Date[Year] ), _LastFullYear )
+			VAR _N = _EndYear - _FirstFullYear
+			-- Detect the geography level BEFORE geography filters are removed (a State Grid tile counts as State level)
+			VAR _Level =
+			    SWITCH (
+			        TRUE (),
+			        ISINSCOPE ( 'Sample - Superstore'[City] ), 3,
+			        ISINSCOPE ( 'Sample - Superstore'[State] ) || ISINSCOPE ( 'State Grid'[Col] ) || ISINSCOPE ( 'State Grid'[State] ), 2,
+			        ISINSCOPE ( 'Sample - Superstore'[Region] ), 1,
+			        0
+			    )
+			VAR _C0 =
+			    CALCULATE (
+			        SWITCH (
+			            _Level,
+			            3, COUNTROWS ( SUMMARIZE ( 'Sample - Superstore', 'Sample - Superstore'[Customer ID], 'Sample - Superstore'[State], 'Sample - Superstore'[City] ) ),
+			            2, COUNTROWS ( SUMMARIZE ( 'Sample - Superstore', 'Sample - Superstore'[Customer ID], 'Sample - Superstore'[State] ) ),
+			            1, COUNTROWS ( SUMMARIZE ( 'Sample - Superstore', 'Sample - Superstore'[Customer ID], 'Sample - Superstore'[Region] ) ),
+			            [Unique Customers]
+			        ),
+			        REMOVEFILTERS ( Dim_Date ), Dim_Date[Year] = _FirstFullYear,
+			        REMOVEFILTERS ( 'Sample - Superstore'[Country], 'Sample - Superstore'[Region], 'Sample - Superstore'[State], 'Sample - Superstore'[City], 'Sample - Superstore'[Postal Code] ),
+			        REMOVEFILTERS ( 'State Grid' )
+			    )
+			VAR _C1 =
+			    CALCULATE (
+			        SWITCH (
+			            _Level,
+			            3, COUNTROWS ( SUMMARIZE ( 'Sample - Superstore', 'Sample - Superstore'[Customer ID], 'Sample - Superstore'[State], 'Sample - Superstore'[City] ) ),
+			            2, COUNTROWS ( SUMMARIZE ( 'Sample - Superstore', 'Sample - Superstore'[Customer ID], 'Sample - Superstore'[State] ) ),
+			            1, COUNTROWS ( SUMMARIZE ( 'Sample - Superstore', 'Sample - Superstore'[Customer ID], 'Sample - Superstore'[Region] ) ),
+			            [Unique Customers]
+			        ),
+			        REMOVEFILTERS ( Dim_Date ), Dim_Date[Year] = _EndYear,
+			        REMOVEFILTERS ( 'Sample - Superstore'[Country], 'Sample - Superstore'[Region], 'Sample - Superstore'[State], 'Sample - Superstore'[City], 'Sample - Superstore'[Postal Code] ),
+			        REMOVEFILTERS ( 'State Grid' )
+			    )
+			RETURN
+			    IF (
+			        MIN ( Dim_Date[Date] ) <= _Last && _N >= 1 && _C0 > 0 && NOT ISBLANK ( _C1 ),
+			        ( _C1 / _C0 ) ^ ( 1 / _N ) - 1
+			    )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: a23619c4-2f17-4325-a6ae-5ef4f34d43ce
+
+	/// Regional Growth % minus Company Sales Growth %, in percentage points. Positive = the location is growing faster than the business overall.
+	measure 'Sales Growth vs Company (pp)' =
+			VAR _Loc = [Regional Growth %]
+			VAR _Co = [Company Sales Growth %]
+			RETURN IF ( NOT ISBLANK ( _Loc ) && NOT ISBLANK ( _Co ), ( _Loc - _Co ) * 100 )
+		formatString: ▲ +0.0" pp";▼ -0.0" pp";0.0" pp"
+		displayFolder: 06 Growth Analysis
+		lineageTag: 1095b594-4325-466a-9df0-4f71189a1bf7
+
+	/// Profit Growth % minus Company Profit Growth %, in percentage points.
+	measure 'Profit Growth vs Company (pp)' =
+			VAR _Loc = [Profit Growth %]
+			VAR _Co = [Company Profit Growth %]
+			RETURN IF ( NOT ISBLANK ( _Loc ) && NOT ISBLANK ( _Co ), ( _Loc - _Co ) * 100 )
+		formatString: ▲ +0.0" pp";▼ -0.0" pp";0.0" pp"
+		displayFolder: 06 Growth Analysis
+		lineageTag: 7c02cd7e-7aac-4ef9-8b54-ec1fe186ac97
+
+	/// Customer Growth % minus Company Customer Growth %, in percentage points. Note: company customer growth is lower than most regions because customers buying in several regions are counted once at company level.
+	measure 'Customer Growth vs Company (pp)' =
+			VAR _Loc = [Customer Growth %]
+			VAR _Co = [Company Customer Growth %]
+			RETURN IF ( NOT ISBLANK ( _Loc ) && NOT ISBLANK ( _Co ), ( _Loc - _Co ) * 100 )
+		formatString: ▲ +0.0" pp";▼ -0.0" pp";0.0" pp"
+		displayFolder: 06 Growth Analysis
+		lineageTag: 6a1f4eb3-3da8-43fc-87b5-648729fb704d
+
+	/// Sales YoY % minus Company Sales YoY %, in percentage points (single-year view).
+	measure 'Sales YoY vs Company (pp)' =
+			VAR _Loc = [Sales YoY %]
+			VAR _Co = [Company Sales YoY %]
+			RETURN IF ( NOT ISBLANK ( _Loc ) && NOT ISBLANK ( _Co ), ( _Loc - _Co ) * 100 )
+		formatString: ▲ +0.0" pp";▼ -0.0" pp";0.0" pp"
+		displayFolder: 06 Growth Analysis
+		lineageTag: cd929c93-e1b9-4414-b821-681e87e15d71
+
+	/// Share of the company's year-on-year sales change that came from this location: (Sales - Sales LY) / (Company Sales - Company Sales LY). Sums to 100% across locations. Negative = location shrank while company grew.
+	measure 'Contribution to Sales Growth %' =
+			VAR _CoLY = [Company Sales LY]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _CoLY ),
+			        DIVIDE ( [Total Sales] - [Sales LY], [Company Sales] - _CoLY )
+			    )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 06 Growth Analysis
+		lineageTag: 1171e8ce-1f8c-419a-8085-e6f0318e2be3
+
+	/// Average monthly Sales over the 3 months ending on the last date in context. Smooths monthly noise on trend lines. Blank for incomplete windows and future periods.
+	measure 'Sales 3M Moving Avg' =
+			VAR _Last = [Last Order Date]
+			VAR _First = [First Order Date]
+			VAR _End = MAX ( Dim_Date[Date] )
+			RETURN
+			    IF (
+			        MIN ( Dim_Date[Date] ) > _Last
+			            || EDATE ( _End, -3 ) + 1 < DATE ( YEAR ( _First ), MONTH ( _First ), 1 ),
+			        BLANK (),
+			        DIVIDE ( CALCULATE ( [Total Sales], DATESINPERIOD ( Dim_Date[Date], _End, -3, MONTH ) ), 3 )
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 07 Trend
+		lineageTag: 67e24195-2d1b-4d12-a71e-b24f0cf520f3
+
+	/// Least-squares linear trend of monthly Sales across the months in context (within the data range): average $ change per month. Needs at least 24 months so that seasonality does not masquerade as trend. Months with no sales count as $0.
+	measure 'Sales Trend Slope (Monthly)' =
+			VAR _Last = [Last Order Date]
+			VAR _First = [First Order Date]
+			VAR _Months =
+			    ADDCOLUMNS (
+			        SUMMARIZE (
+			            FILTER ( Dim_Date, Dim_Date[Date] >= _First && Dim_Date[Date] <= _Last ),
+			            Dim_Date[Year], Dim_Date[Month Number]
+			        ),
+			        "@x", Dim_Date[Year] * 12 + Dim_Date[Month Number],
+			        "@y", COALESCE ( [Total Sales], 0 )
+			    )
+			RETURN
+			    IF ( COUNTROWS ( _Months ) >= 24, MAXX ( LINESTX ( _Months, [@y], [@x] ), [Slope1] ) )
+		formatString: +\$#,0;-\$#,0;\$#,0
+		displayFolder: 07 Trend
+		lineageTag: d8ed6af6-a7c4-4970-9d2a-b73031a4f734
+
+	/// Linear trend expressed as annual growth relative to the average month: (monthly slope x 12) / average monthly Sales. Uses every month, so it is less sensitive to a single good/bad year than CAGR. Needs at least 24 months (seasonality).
+	measure 'Sales Trend % per Year' =
+			VAR _Last = [Last Order Date]
+			VAR _First = [First Order Date]
+			VAR _Months =
+			    ADDCOLUMNS (
+			        SUMMARIZE (
+			            FILTER ( Dim_Date, Dim_Date[Date] >= _First && Dim_Date[Date] <= _Last ),
+			            Dim_Date[Year], Dim_Date[Month Number]
+			        ),
+			        "@x", Dim_Date[Year] * 12 + Dim_Date[Month Number],
+			        "@y", COALESCE ( [Total Sales], 0 )
+			    )
+			VAR _Slope = MAXX ( LINESTX ( _Months, [@y], [@x] ), [Slope1] )
+			RETURN
+			    IF ( COUNTROWS ( _Months ) >= 24, DIVIDE ( _Slope * 12, AVERAGEX ( _Months, [@y] ) ) )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 07 Trend
+		lineageTag: 13bd419c-63b1-47ac-a2ab-5d2c21808c25
+
+	/// Coefficient of determination (0-1) of the monthly linear trend. Higher = growth is steady; low = sales are volatile/seasonal and the trend is less reliable. Needs at least 24 months.
+	measure 'Sales Trend R²' =
+			VAR _Last = [Last Order Date]
+			VAR _First = [First Order Date]
+			VAR _Months =
+			    ADDCOLUMNS (
+			        SUMMARIZE (
+			            FILTER ( Dim_Date, Dim_Date[Date] >= _First && Dim_Date[Date] <= _Last ),
+			            Dim_Date[Year], Dim_Date[Month Number]
+			        ),
+			        "@x", Dim_Date[Year] * 12 + Dim_Date[Month Number],
+			        "@y", COALESCE ( [Total Sales], 0 )
+			    )
+			RETURN
+			    IF ( COUNTROWS ( _Months ) >= 24, MAXX ( LINESTX ( _Months, [@y], [@x] ), [CoefficientOfDetermination] ) )
+		formatString: 0.00
+		displayFolder: 07 Trend
+		lineageTag: 774cbe44-f577-4eda-a917-c55cd9742b00
+
+	/// Share of months in context (that have a prior-year month to compare) where Sales beat the same month last year. 100% = grew every month; 50% = coin flip.
+	measure 'Growth Consistency %' =
+			VAR _Last = [Last Order Date]
+			VAR _Months =
+			    ADDCOLUMNS (
+			        SUMMARIZE ( FILTER ( Dim_Date, Dim_Date[Date] <= _Last ), Dim_Date[Year Month Key] ),
+			        "@cy", COALESCE ( [Total Sales], 0 ),
+			        "@ly", [Sales LY]
+			    )
+			VAR _Comparable = FILTER ( _Months, NOT ISBLANK ( [@ly] ) )
+			RETURN
+			    DIVIDE ( COUNTROWS ( FILTER ( _Comparable, [@cy] > [@ly] ) ), COUNTROWS ( _Comparable ) )
+		formatString: 0%
+		displayFolder: 07 Trend
+		lineageTag: 1febd269-13dc-462e-a112-e1d0fdfcca9a
+
+	/// Sales in the 12 calendar months ending with the month of the last order date. Anchored to the data - ignores date slicers so recent performance is always comparable.
+	measure 'Sales Last 12M' =
+			VAR _End = EOMONTH ( [Last Order Date], 0 )
+			VAR _Start = EOMONTH ( [Last Order Date], -12 ) + 1
+			RETURN
+			    CALCULATE (
+			        [Total Sales],
+			        REMOVEFILTERS ( Dim_Date ),
+			        FILTER ( ALL ( Dim_Date[Date] ), Dim_Date[Date] >= _Start && Dim_Date[Date] <= _End )
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 08 Recent Performance
+		lineageTag: af8a9473-33a5-4757-806c-7b1da0ab60e0
+
+	/// Sales in the 12 months before the Last 12M window. Ignores date slicers.
+	measure 'Sales Prior 12M' =
+			VAR _End = EOMONTH ( [Last Order Date], -12 )
+			VAR _Start = EOMONTH ( [Last Order Date], -24 ) + 1
+			RETURN
+			    CALCULATE (
+			        [Total Sales],
+			        REMOVEFILTERS ( Dim_Date ),
+			        FILTER ( ALL ( Dim_Date[Date] ), Dim_Date[Date] >= _Start && Dim_Date[Date] <= _End )
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 08 Recent Performance
+		lineageTag: 22d03deb-3bd5-4f79-8120-b2636f724e17
+
+	/// (Sales Last 12M - Sales Prior 12M) / Sales Prior 12M.
+	measure 'Sales Last 12M Growth %' =
+			VAR _Prior = [Sales Prior 12M]
+			RETURN IF ( NOT ISBLANK ( _Prior ), DIVIDE ( [Sales Last 12M] - _Prior, _Prior ) )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 08 Recent Performance
+		lineageTag: 21922a77-26b1-4a50-b878-196505513ee5
+
+	/// Sales in the 6 calendar months ending with the month of the last order date. Ignores date slicers.
+	measure 'Sales Last 6M' =
+			VAR _End = EOMONTH ( [Last Order Date], 0 )
+			VAR _Start = EOMONTH ( [Last Order Date], -6 ) + 1
+			RETURN
+			    CALCULATE (
+			        [Total Sales],
+			        REMOVEFILTERS ( Dim_Date ),
+			        FILTER ( ALL ( Dim_Date[Date] ), Dim_Date[Date] >= _Start && Dim_Date[Date] <= _End )
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 08 Recent Performance
+		lineageTag: 3f0a5386-18b6-42cd-bf56-d1d573ca6878
+
+	/// Sales in the same 6 calendar months one year earlier (seasonally comparable). Ignores date slicers.
+	measure 'Sales Last 6M PY' =
+			VAR _End = EOMONTH ( [Last Order Date], -12 )
+			VAR _Start = EOMONTH ( [Last Order Date], -18 ) + 1
+			RETURN
+			    CALCULATE (
+			        [Total Sales],
+			        REMOVEFILTERS ( Dim_Date ),
+			        FILTER ( ALL ( Dim_Date[Date] ), Dim_Date[Date] >= _Start && Dim_Date[Date] <= _End )
+			    )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 08 Recent Performance
+		lineageTag: 3fb6323c-d229-437d-a7f4-efa43cdbb03e
+
+	/// (Sales Last 6M - Sales Last 6M PY) / Sales Last 6M PY. The most recent seasonally-comparable growth signal.
+	measure 'Sales Last 6M YoY %' =
+			VAR _PY = [Sales Last 6M PY]
+			RETURN IF ( NOT ISBLANK ( _PY ), DIVIDE ( [Sales Last 6M] - _PY, _PY ) )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 08 Recent Performance
+		lineageTag: 516978ce-e867-476a-ace5-46d3a8ef85fa
+
+	/// Profit / Sales over the Last 12M window. Ignores date slicers.
+	measure 'Profit Margin Last 12M %' =
+			VAR _End = EOMONTH ( [Last Order Date], 0 )
+			VAR _Start = EOMONTH ( [Last Order Date], -12 ) + 1
+			RETURN
+			    CALCULATE (
+			        [Profit Margin %],
+			        REMOVEFILTERS ( Dim_Date ),
+			        FILTER ( ALL ( Dim_Date[Date] ), Dim_Date[Date] >= _Start && Dim_Date[Date] <= _End )
+			    )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 08 Recent Performance
+		lineageTag: eafbbed0-9fc1-438f-b451-6e337b3c4188
+
+	/// Distinct customers ordering in the Last 12M window. Ignores date slicers. Not additive across locations.
+	measure 'Customers Last 12M' =
+			VAR _End = EOMONTH ( [Last Order Date], 0 )
+			VAR _Start = EOMONTH ( [Last Order Date], -12 ) + 1
+			RETURN
+			    CALCULATE (
+			        [Unique Customers],
+			        REMOVEFILTERS ( Dim_Date ),
+			        FILTER ( ALL ( Dim_Date[Date] ), Dim_Date[Date] >= _Start && Dim_Date[Date] <= _End )
+			    )
+		formatString: #,0
+		displayFolder: 08 Recent Performance
+		lineageTag: 31a0a41d-bbcd-4e19-a1b7-268c18049c74
+
+	/// Growth in distinct ordering customers: Last 12M vs Prior 12M.
+	measure 'Customers Last 12M Growth %' =
+			VAR _End = EOMONTH ( [Last Order Date], -12 )
+			VAR _Start = EOMONTH ( [Last Order Date], -24 ) + 1
+			VAR _Prior =
+			    CALCULATE (
+			        [Unique Customers],
+			        REMOVEFILTERS ( Dim_Date ),
+			        FILTER ( ALL ( Dim_Date[Date] ), Dim_Date[Date] >= _Start && Dim_Date[Date] <= _End )
+			    )
+			RETURN IF ( NOT ISBLANK ( _Prior ), DIVIDE ( [Customers Last 12M] - _Prior, _Prior ) )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 08 Recent Performance
+		lineageTag: b8dba085-962f-4740-a65e-e5b0179888cb
+
+	/// Sales Last 6M YoY % minus the location's long-run Regional Growth % (all complete years), in percentage points. Positive = growth is accelerating recently; negative = decelerating.
+	measure 'Growth Momentum (pp)' =
+			VAR _Recent = [Sales Last 6M YoY %]
+			VAR _LongRun = CALCULATE ( [Regional Growth %], REMOVEFILTERS ( Dim_Date ) )
+			RETURN IF ( NOT ISBLANK ( _Recent ) && NOT ISBLANK ( _LongRun ), ( _Recent - _LongRun ) * 100 )
+		formatString: ▲ +0.0" pp";▼ -0.0" pp";0.0" pp"
+		displayFolder: 08 Recent Performance
+		lineageTag: e66a58c6-63ea-4970-89b6-661f285d478f
+
+	/// Profit Margin % minus Company Profit Margin %, in percentage points.
+	measure 'Margin vs Company (pp)' =
+			VAR _Loc = [Profit Margin %]
+			VAR _Co = [Company Profit Margin %]
+			RETURN IF ( NOT ISBLANK ( _Loc ) && NOT ISBLANK ( _Co ), ( _Loc - _Co ) * 100 )
+		formatString: ▲ +0.0" pp";▼ -0.0" pp";0.0" pp"
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: 4498311e-b577-4dfe-9a46-7cb4f98923aa
+
+	/// Total Sales / Unique Customers - customer value in the location.
+	measure 'Sales per Customer' = DIVIDE ( [Total Sales], [Unique Customers] )
+		formatString: \$#,0
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: 15d2b3db-9bce-4736-aa28-26a3291e2bee
+
+	/// Total Profit / Unique Customers.
+	measure 'Profit per Customer' = DIVIDE ( [Total Profit], [Unique Customers] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: 638f3656-cdf7-4677-afd8-e97db4d1e8c1
+
+	/// Total Orders / Unique Customers - purchase frequency / repeat intensity.
+	measure 'Orders per Customer' = DIVIDE ( [Total Orders], [Unique Customers] )
+		formatString: 0.00
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: bfff89e4-6cc6-4f56-927d-061a32e4b847
+
+	/// Rank by Total Sales among peers at the current geography level (City, State or Region) within the current selection. 1 = highest.
+	measure 'Sales Rank' =
+			VAR _v = [Total Sales]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _v ),
+			        SWITCH (
+			            TRUE (),
+			            ISINSCOPE ( 'Sample - Superstore'[City] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[City] ), NOT ISBLANK ( [Total Sales] ) ), [Total Sales], _v, DESC, DENSE ),
+			            ISINSCOPE ( 'Sample - Superstore'[State] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[State] ), NOT ISBLANK ( [Total Sales] ) ), [Total Sales], _v, DESC, DENSE ),
+			            ISINSCOPE ( 'Sample - Superstore'[Region] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[Region] ), NOT ISBLANK ( [Total Sales] ) ), [Total Sales], _v, DESC, DENSE )
+			        )
+			    )
+		formatString: 0
+		displayFolder: 10 Ranking
+		lineageTag: e67a035c-f050-4776-a21a-ed547dc2ebe3
+
+	/// Rank by Regional Growth % (sales CAGR) among peers at the current geography level. 1 = fastest growing. Locations without a CAGR are not ranked.
+	measure 'Sales Growth Rank' =
+			VAR _v = [Regional Growth %]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _v ),
+			        SWITCH (
+			            TRUE (),
+			            ISINSCOPE ( 'Sample - Superstore'[City] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[City] ), NOT ISBLANK ( [Regional Growth %] ) ), [Regional Growth %], _v, DESC, DENSE ),
+			            ISINSCOPE ( 'Sample - Superstore'[State] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[State] ), NOT ISBLANK ( [Regional Growth %] ) ), [Regional Growth %], _v, DESC, DENSE ),
+			            ISINSCOPE ( 'Sample - Superstore'[Region] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[Region] ), NOT ISBLANK ( [Regional Growth %] ) ), [Regional Growth %], _v, DESC, DENSE )
+			        )
+			    )
+		formatString: 0
+		displayFolder: 10 Ranking
+		lineageTag: 2c90b0eb-b459-4121-acac-12e926973322
+
+	/// Rank by Profit Margin % among peers at the current geography level. 1 = highest margin.
+	measure 'Profit Margin Rank' =
+			VAR _v = [Profit Margin %]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _v ),
+			        SWITCH (
+			            TRUE (),
+			            ISINSCOPE ( 'Sample - Superstore'[City] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[City] ), NOT ISBLANK ( [Profit Margin %] ) ), [Profit Margin %], _v, DESC, DENSE ),
+			            ISINSCOPE ( 'Sample - Superstore'[State] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[State] ), NOT ISBLANK ( [Profit Margin %] ) ), [Profit Margin %], _v, DESC, DENSE ),
+			            ISINSCOPE ( 'Sample - Superstore'[Region] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[Region] ), NOT ISBLANK ( [Profit Margin %] ) ), [Profit Margin %], _v, DESC, DENSE )
+			        )
+			    )
+		formatString: 0
+		displayFolder: 10 Ranking
+		lineageTag: 56e4fb04-b4d2-4f29-bc94-3113f77c4653
+
+	/// Rank by Sales Last 6M YoY % among peers at the current geography level. 1 = strongest recent growth.
+	measure 'Recent Growth Rank' =
+			VAR _v = [Sales Last 6M YoY %]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _v ),
+			        SWITCH (
+			            TRUE (),
+			            ISINSCOPE ( 'Sample - Superstore'[City] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[City] ), NOT ISBLANK ( [Sales Last 6M YoY %] ) ), [Sales Last 6M YoY %], _v, DESC, DENSE ),
+			            ISINSCOPE ( 'Sample - Superstore'[State] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[State] ), NOT ISBLANK ( [Sales Last 6M YoY %] ) ), [Sales Last 6M YoY %], _v, DESC, DENSE ),
+			            ISINSCOPE ( 'Sample - Superstore'[Region] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[Region] ), NOT ISBLANK ( [Sales Last 6M YoY %] ) ), [Sales Last 6M YoY %], _v, DESC, DENSE )
+			        )
+			    )
+		formatString: 0
+		displayFolder: 10 Ranking
+		lineageTag: f5669f68-b5ad-45a2-84cd-1bc3ee8702bb
+
+	/// Rank by Customer Growth % among peers at the current geography level. 1 = fastest-growing buyer base.
+	measure 'Customer Growth Rank' =
+			VAR _v = [Customer Growth %]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( _v ),
+			        SWITCH (
+			            TRUE (),
+			            ISINSCOPE ( 'Sample - Superstore'[City] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[City] ), NOT ISBLANK ( [Customer Growth %] ) ), [Customer Growth %], _v, DESC, DENSE ),
+			            ISINSCOPE ( 'Sample - Superstore'[State] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[State] ), NOT ISBLANK ( [Customer Growth %] ) ), [Customer Growth %], _v, DESC, DENSE ),
+			            ISINSCOPE ( 'Sample - Superstore'[Region] ), RANKX ( FILTER ( ALLSELECTED ( 'Sample - Superstore'[Region] ), NOT ISBLANK ( [Customer Growth %] ) ), [Customer Growth %], _v, DESC, DENSE )
+			        )
+			    )
+		formatString: 0
+		displayFolder: 10 Ranking
+		lineageTag: b0d0384d-4a66-40ee-865c-abc055ca67f7
+
+	/// Selected value of the Min Orders what-if parameter (default 50).
+	measure 'Min Orders Value' = SELECTEDVALUE ( 'Min Orders'[Min Orders], 50 )
+		formatString: 0
+		displayFolder: 99 Helpers
+		lineageTag: 53cd13e1-d3b2-4c82-8b2a-3e2085b9442b
+
+	/// 1 when the location's all-time order count is at least Min Orders Value, else 0. Use as a visual-level filter (= 1) on Expansion visuals.
+	measure 'Meets Volume Threshold' = IF ( CALCULATE ( [Total Orders], REMOVEFILTERS ( Dim_Date ) ) >= [Min Orders Value], 1, 0 )
+		formatString: 0
+		displayFolder: 99 Helpers
+		lineageTag: 7664671d-679f-4d5a-9718-f3e04044489b
+
+	/// Profit LY / Sales LY (like-for-like).
+	measure 'Profit Margin LY' = DIVIDE ( [Profit LY], [Sales LY] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 03 Time Intelligence
+		lineageTag: 749246ef-34cc-466e-a67d-7db71c2bd8c4
+
+	/// Change in Profit Margin % vs last year, in percentage points.
+	measure 'Profit Margin YoY (pp)' =
+			VAR _LY = [Profit Margin LY]
+			VAR _CY = [Profit Margin %]
+			RETURN IF ( NOT ISBLANK ( _LY ) && NOT ISBLANK ( _CY ), ( _CY - _LY ) * 100 )
+		formatString: ▲ +0.0" pp";▼ -0.0" pp";0.0" pp"
+		displayFolder: 04 Growth
+		lineageTag: 8eee4d92-49e6-4103-8194-0c92ea68be9d
+
+	/// Distinct orders in the same period last year (like-for-like, see Sales LY).
+	measure 'Total Orders LY' =
+			VAR _Last = [Last Order Date]
+			VAR _Min = MIN ( Dim_Date[Date] )
+			VAR _Max = MAX ( Dim_Date[Date] )
+			RETURN
+			    IF (
+			        _Min > _Last || INT ( _Max - _Min ) > 366,
+			        BLANK (),
+			        CALCULATE (
+			            [Total Orders],
+			            DATEADD ( FILTER ( VALUES ( Dim_Date[Date] ), Dim_Date[Date] <= _Last ), -1, YEAR )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: 03 Time Intelligence
+		lineageTag: f9a4e27a-422f-4e20-8e5c-802753b536ee
+
+	/// (Total Orders - Total Orders LY) / Total Orders LY.
+	measure 'Orders YoY %' =
+			VAR _LY = [Total Orders LY]
+			RETURN IF ( NOT ISBLANK ( _LY ), DIVIDE ( [Total Orders] - _LY, _LY ) )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 04 Growth
+		lineageTag: 72c3dcb7-0ad0-4a1c-b309-62e36fa798b5
+
+	/// Total Sales / Company Sales (geography removed). Unlike Sales Contribution %, a region slicer does not reset it to 100%.
+	measure 'Sales Share of Company %' = DIVIDE ( [Total Sales], [Company Sales] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 05 Contribution
+		lineageTag: a1dabf36-ec0f-4eca-a23a-dffd40162b68
+
+	/// Average Order Value with geography filters removed.
+	measure 'Company Average Order Value' =
+			CALCULATE (
+			    [Average Order Value],
+			    REMOVEFILTERS (
+			        'Sample - Superstore'[Country], 'Sample - Superstore'[Region], 'Sample - Superstore'[State],
+			        'Sample - Superstore'[City], 'Sample - Superstore'[Postal Code]
+			    ),
+			    REMOVEFILTERS ( 'State Grid' )
+			)
+		formatString: \$#,0.00
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: 139ed6d7-f839-4aa6-981d-1c3397c0bc56
+
+	/// (Average Order Value - Company Average Order Value) / Company Average Order Value.
+	measure 'AOV vs Company %' =
+			VAR _Co = [Company Average Order Value]
+			RETURN IF ( NOT ISBLANK ( _Co ), DIVIDE ( [Average Order Value] - _Co, _Co ) )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 09 Benchmark vs Company
+		lineageTag: 78db4dfb-f97a-4240-a969-a17f1c3f26a9
+
+	/// Page subtitle: data currency and source.
+	measure 'Data As Of' = "Data through " & FORMAT ( [Last Order Date], "d mmm yyyy" ) & "  ·  US Superstore  ·  Order-date based"
+		displayFolder: 11 Report Text
+		lineageTag: 177ce316-b5c7-4d57-8bb3-bced32a9efa8
+
+	/// Name of the hovered/selected location for tooltip titles.
+	measure 'Location Label' =
+			VAR _State = SELECTEDVALUE ( 'Sample - Superstore'[State] )
+			VAR _Region = SELECTEDVALUE ( 'Sample - Superstore'[Region] )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        NOT ISBLANK ( _State ), _State & IF ( NOT ISBLANK ( _Region ), "  ·  " & _Region & " region" ),
+			        NOT ISBLANK ( _Region ), _Region & " region",
+			        "All regions"
+			    )
+		displayFolder: 11 Report Text
+		lineageTag: ca7d2f09-057f-4f6d-ad33-94a31f3d65c0
+
+	/// Dynamic factual page title for Executive Regional Overview.
+	measure 'Headline - Overview' =
+			VAR _Period = IF ( HASONEVALUE ( Dim_Date[Year] ), FORMAT ( VALUES ( Dim_Date[Year] ), "0" ), "2014–2017" )
+			VAR _YoY = [Sales YoY %]
+			VAR _Regions =
+			    ADDCOLUMNS (
+			        ALLSELECTED ( 'Sample - Superstore'[Region] ),
+			        "@g", IF ( NOT ISBLANK ( _YoY ), [Sales YoY %], [Regional Growth %] )
+			    )
+			VAR _Top = TOPN ( 1, FILTER ( _Regions, NOT ISBLANK ( [@g] ) ), [@g], DESC )
+			VAR _TopName = MAXX ( _Top, 'Sample - Superstore'[Region] )
+			VAR _TopVal = MAXX ( _Top, [@g] )
+			VAR _Lead =
+			    IF (
+			        NOT ISBLANK ( _YoY ),
+			        "Sales " & FORMAT ( _YoY, "▲ +0.0%;▼ -0.0%" ) & " vs last year in " & _Period,
+			        FORMAT ( [Total Sales], "$#,0" ) & " sales in " & _Period
+			    )
+			VAR _Growth =
+			    IF (
+			        NOT ISBLANK ( _TopName ),
+			        "  ·  Fastest-growing region: " & _TopName & " (" & FORMAT ( _TopVal, "+0.0%;-0.0%" )
+			            & IF ( ISBLANK ( _YoY ), " a year, 2014–17", " vs LY" ) & ")"
+			    )
+			RETURN _Lead & _Growth
+		displayFolder: 11 Report Text
+		lineageTag: 0385da81-100c-442d-95fb-2093e0689ccf
+
+	/// Dynamic factual page title for Regional Deep Dive.
+	measure 'Headline - Deep Dive' =
+			VAR _Scope =
+			    SWITCH (
+			        TRUE (),
+			        HASONEVALUE ( 'Sample - Superstore'[Region] ), VALUES ( 'Sample - Superstore'[Region] ) & " region",
+			        ISFILTERED ( 'Sample - Superstore'[Region] ), "Selected regions",
+			        "All regions"
+			    )
+			VAR _Period = IF ( HASONEVALUE ( Dim_Date[Year] ), FORMAT ( VALUES ( Dim_Date[Year] ), "0" ), "2014–2017" )
+			RETURN
+			    _Scope & " · " & _Period & ":  " & FORMAT ( [Total Sales], "$#,0" ) & " sales ("
+			        & FORMAT ( [Sales Share of Company %], "0.0%" ) & " of company)  ·  margin "
+			        & FORMAT ( [Profit Margin %], "0.0%" ) & " vs company " & FORMAT ( [Company Profit Margin %], "0.0%" )
+		displayFolder: 11 Report Text
+		lineageTag: eac6027c-a809-4224-b8ce-1dbbb0eec87b
+
+	/// Dynamic factual page title for Expansion Analysis: how many states beat the company on BOTH long-run sales growth and profit margin, among states meeting the Min Orders threshold. States facts only - no recommendation.
+	measure 'Headline - Expansion' =
+			VAR _CoGrowth = [Company Sales Growth %]
+			VAR _CoMargin = [Company Profit Margin %]
+			VAR _States =
+			    FILTER (
+			        ADDCOLUMNS (
+			            VALUES ( 'Sample - Superstore'[State] ),
+			            "@g", [Regional Growth %],
+			            "@m", [Profit Margin %],
+			            "@ok", [Meets Volume Threshold]
+			        ),
+			        [@ok] = 1
+			    )
+			VAR _M = COUNTROWS ( _States )
+			VAR _N = COUNTROWS ( FILTER ( _States, [@g] > _CoGrowth && [@m] > _CoMargin ) )
+			RETURN
+			    FORMAT ( _N, "0" ) & " of " & FORMAT ( _M, "0" )
+			        & " states grow faster than the company and earn an above-company margin  ·  min "
+			        & FORMAT ( [Min Orders Value], "0" ) & " orders"
+		displayFolder: 11 Report Text
+		lineageTag: 4eab98e4-20f9-4bc9-91c7-884078d98397
+
+	/// Fixed report colour per region (design system). Used for conditional font colour in tables.
+	measure 'Region Color' =
+			SWITCH (
+			    SELECTEDVALUE ( 'Sample - Superstore'[Region] ),
+			    "West", "#7C3AED",
+			    "East", "#0D9488",
+			    "Central", "#D97706",
+			    "South", "#DB2777",
+			    "#334155"
+			)
+		isHidden
+		displayFolder: 99 Helpers
+		lineageTag: ba61d6cb-175d-4db0-be13-2437c77c269f
+
+	/// Two-letter state code for tile-grid map cells (blank where the grid has no state).
+	measure 'State Tile Label' = SELECTEDVALUE ( 'State Grid'[Abbr] )
+		displayFolder: 12 Map
+		lineageTag: 78422f92-2d1b-46be-8a50-0996b5dc7fa8
+
+	/// Sales Growth vs Company (pp) for states meeting the Min Orders threshold; blank otherwise (tile shown uncoloured).
+	measure 'Map Growth vs Company (pp)' = IF ( [Meets Volume Threshold] = 1, [Sales Growth vs Company (pp)] )
+		formatString: ▲ +0.0" pp";▼ -0.0" pp";0.0" pp"
+		displayFolder: 12 Map
+		lineageTag: 386f01cf-8a02-4990-8160-077980045a3e
+
+	/// Number of states that meet the Min Orders threshold (all years) in the current selection.
+	measure 'States Analysed' = COUNTROWS ( FILTER ( VALUES ( 'Sample - Superstore'[State] ), [Meets Volume Threshold] = 1 ) )
+		formatString: 0
+		displayFolder: 06 Growth Analysis
+		lineageTag: 0d423702-1a52-45ce-9801-86b8d591c8a1
+
+	/// States (meeting Min Orders) whose sales growth AND profit margin are both above the company benchmark. Objective count, not a recommendation.
+	measure 'States Beating Company' =
+			VAR _CoGrowth = [Company Sales Growth %]
+			VAR _CoMargin = [Company Profit Margin %]
+			RETURN
+			    COUNTROWS (
+			        FILTER (
+			            VALUES ( 'Sample - Superstore'[State] ),
+			            [Meets Volume Threshold] = 1
+			                && [Regional Growth %] > _CoGrowth
+			                && [Profit Margin %] > _CoMargin
+			        )
+			    ) + 0
+		formatString: 0
+		displayFolder: 06 Growth Analysis
+		lineageTag: d3e2c84d-58de-4dfe-a048-3ce8a3f0cc56
+
+	/// Sales per active customer, same period last year (like-for-like).
+	measure 'Sales per Customer LY' = DIVIDE ( [Sales LY], [Unique Customers LY] )
+		formatString: \$#,0
+		displayFolder: 03 Time Intelligence
+		lineageTag: 55a869b9-56a2-400b-8cb5-85b1fd2ea5aa
+
+	/// Change in sales per active customer vs last year.
+	measure 'Sales per Customer YoY %' = VAR _LY = [Sales per Customer LY] RETURN IF ( NOT ISBLANK ( _LY ), DIVIDE ( [Sales per Customer] - _LY, _LY ) )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 04 Growth
+		lineageTag: ccb08571-182e-4dd4-8104-e815ad625cc5
+
+	/// Orders per active customer, same period last year.
+	measure 'Orders per Customer LY' = DIVIDE ( [Total Orders LY], [Unique Customers LY] )
+		formatString: 0.00
+		displayFolder: 03 Time Intelligence
+		lineageTag: 57692e05-7ff2-4525-88b7-2239e5fa9122
+
+	/// Change in purchase frequency vs last year.
+	measure 'Orders per Customer YoY %' = VAR _LY = [Orders per Customer LY] RETURN IF ( NOT ISBLANK ( _LY ), DIVIDE ( [Orders per Customer] - _LY, _LY ) )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 04 Growth
+		lineageTag: 75642844-708f-46c7-896e-ed6e8607f207
+
+	/// Average order value, same period last year.
+	measure 'Average Order Value LY' = DIVIDE ( [Sales LY], [Total Orders LY] )
+		formatString: \$#,0.00
+		displayFolder: 03 Time Intelligence
+		lineageTag: 7b96f58f-72e7-481d-8029-e310efb84a8d
+
+	/// Change in average order value vs last year.
+	measure 'Average Order Value YoY %' = VAR _LY = [Average Order Value LY] RETURN IF ( NOT ISBLANK ( _LY ), DIVIDE ( [Average Order Value] - _LY, _LY ) )
+		formatString: ▲ +0.0%;▼ -0.0%;0.0%
+		displayFolder: 04 Growth
+		lineageTag: 67000c86-37d7-4e86-89a5-721cb4b99acd
+
+	/// Last order date as text, for the footer.
+	measure 'Data Through Date' = FORMAT ( [Last Order Date], "d mmm yyyy" )
+		displayFolder: 11 Report Text
+		lineageTag: 8a2feead-3dc4-4e2f-80e5-a8fc3619ea0b
+
+	column _placeholder
+		isHidden
+		lineageTag: c4b9f7c9-3360-4c5a-91de-4a2f5aacaf1d
+		isNameInferred
+		sourceColumn: [_placeholder]
+
+	partition _Measures = calculated
+		mode: import
+		source = ROW ( "_placeholder", BLANK () )
+

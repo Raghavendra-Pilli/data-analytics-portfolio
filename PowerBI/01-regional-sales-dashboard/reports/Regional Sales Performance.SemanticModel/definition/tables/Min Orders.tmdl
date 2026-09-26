@@ -1,0 +1,20 @@
+/// What-if parameter: minimum all-time orders a location needs to appear in Expansion Analysis visuals (sample-size guard). Set by the report user.
+table 'Min Orders'
+	lineageTag: eeff75fe-ae13-4576-9b05-564734d85357
+
+	column 'Min Orders'
+		formatString: 0
+		lineageTag: 6df92ec8-9c93-45d9-a108-bd29763e2049
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Min Orders]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+	partition 'Min Orders' = calculated
+		mode: import
+		source = SELECTCOLUMNS ( GENERATESERIES ( 0, 300, 25 ), "Min Orders", [Value] )
+

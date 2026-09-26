@@ -1,0 +1,193 @@
+table 'Sample - Superstore'
+	lineageTag: 62af880d-333e-4087-974b-787d86852adf
+
+	column 'Row ID'
+		dataType: int64
+		formatString: 0
+		lineageTag: 96d4f3be-7771-4563-a9c4-2f75c2f98fc9
+		summarizeBy: none
+		sourceColumn: Row ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Order ID'
+		dataType: string
+		lineageTag: ebed0129-f14b-4ac7-87f1-1af39cc7d705
+		summarizeBy: none
+		sourceColumn: Order ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Order Date'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 8f82b954-4b7b-45f6-80fb-0a5875b37258
+		summarizeBy: none
+		sourceColumn: Order Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Ship Date'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 4a12cd63-d062-49e2-805c-e69b193943e0
+		summarizeBy: none
+		sourceColumn: Ship Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Ship Mode'
+		dataType: string
+		lineageTag: 28d3679e-b5b5-43a3-9ac9-077466bda18b
+		summarizeBy: none
+		sourceColumn: Ship Mode
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Foreign key to DimCustomer. Use DimCustomer[Customer ID] in visuals.
+	column 'Customer ID'
+		dataType: string
+		isHidden
+		lineageTag: cb634bb8-2d0e-4725-8fdd-8058f7d4ac83
+		summarizeBy: none
+		sourceColumn: Customer ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country
+		dataType: string
+		lineageTag: 6de6c1f2-edd5-46d9-bd37-2e22f4dfebf9
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = Automatic
+
+	column City
+		dataType: string
+		lineageTag: 7245b73b-8365-4db1-b954-5a9103e41d9c
+		dataCategory: City
+		summarizeBy: none
+		sourceColumn: City
+
+		annotation SummarizationSetBy = Automatic
+
+	column State
+		dataType: string
+		lineageTag: 2b80e2da-1b87-4a33-9158-ad24699c64f5
+		dataCategory: StateOrProvince
+		summarizeBy: none
+		sourceColumn: State
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Postal Code'
+		dataType: int64
+		formatString: 0
+		lineageTag: 82ef7ea4-aadd-4d13-8aa4-aefbee75989f
+		dataCategory: PostalCode
+		summarizeBy: none
+		sourceColumn: Postal Code
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: 954be22a-039f-4df8-ad74-e7e3bf0a978d
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Product ID'
+		dataType: string
+		lineageTag: ed9abdee-4eac-4359-b91b-9d487980828f
+		summarizeBy: none
+		sourceColumn: Product ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: db18713d-ddae-4927-b31f-3f5ae755389d
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sub-Category
+		dataType: string
+		lineageTag: c84955be-0f35-4120-ab65-c7dea9256c1d
+		summarizeBy: none
+		sourceColumn: Sub-Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Product Name'
+		dataType: string
+		lineageTag: e7aec15c-55b6-47c0-9a59-86f3bd0830c8
+		summarizeBy: none
+		sourceColumn: Product Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sales
+		dataType: double
+		lineageTag: 810945dd-7eda-49c4-aeac-8f2665427dee
+		summarizeBy: sum
+		sourceColumn: Sales
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: d0a61e9e-f217-4612-ae63-9532c73b3df3
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column Discount
+		dataType: double
+		formatString: 0%
+		lineageTag: 6671c618-8472-4913-a5e9-70666689d2a9
+		summarizeBy: average
+		sourceColumn: Discount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Profit
+		dataType: double
+		lineageTag: be15482b-c658-46ff-b099-946f67375ed7
+		summarizeBy: sum
+		sourceColumn: Profit
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'Sample - Superstore' = m
+		mode: import
+		source =
+				let
+				  Source = stg_Superstore,
+				  // Same key rule as DimCustomer: trim + upper-case; blank/null keys map to the UNKNOWN member
+				  #"Cleaned Customer ID" = Table.TransformColumns(Source, {{"Customer ID", each let k = if _ = null then "" else Text.Upper(Text.Trim(_)) in if k = "" then "UNKNOWN" else k, type text}}),
+				  // Customer attributes live in DimCustomer only
+				  #"Removed customer attributes" = Table.RemoveColumns(#"Cleaned Customer ID", {"Customer Name", "Segment"}, MissingField.Ignore)
+				in
+				  #"Removed customer attributes"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
