@@ -1,0 +1,13 @@
+# Data files — download manually from Kaggle
+data/*.csv
+data/*.xls
+data/*.xlsx
+
+# Power BI cache
+.pbi/
+*.pbix.bak
+
+# System
+.DS_Store
+Thumbs.db
+desktop.ini

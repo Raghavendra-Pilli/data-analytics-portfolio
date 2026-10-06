@@ -1,0 +1,84 @@
+{
+  "name": "PurpleNight-7c3e91ab.json",
+  "dataColors": [
+    "#8B7CFF",
+    "#C084FC",
+    "#6C74C9",
+    "#B8A9FF",
+    "#4B4FA8",
+    "#9F8CFF",
+    "#5B4FD6",
+    "#D9D2FF"
+  ],
+  "background": "#1A1D3B",
+  "foreground": "#E6E6FA",
+  "firstLevelElements": "#E6E6FA",
+  "secondLevelElements": "#A39FD6",
+  "thirdLevelElements": "#2F3366",
+  "fourthLevelElements": "#8C88C0",
+  "secondaryBackground": "#20244A",
+  "tableAccent": "#8B7CFF",
+  "good": "#6C74C9",
+  "neutral": "#C084FC",
+  "bad": "#8B7CFF",
+  "textClasses": {
+    "label": {
+      "fontFace": "Segoe UI",
+      "color": "#E6E6FA"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Semibold",
+      "color": "#E4E0FF"
+    },
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "color": "#E6E6FA"
+    },
+    "header": {
+      "fontFace": "Segoe UI Semibold",
+      "color": "#E6E6FA"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#1A1D3B"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "slicer": {
+      "*": {
+        "items": [
+          {
+            "fontColor": {
+              "solid": {
+                "color": "#E6E6FA"
+              }
+            },
+            "background": {
+              "solid": {
+                "color": "#1A1D3B"
+              }
+            }
+          }
+        ],
+        "header": [
+          {
+            "fontColor": {
+              "solid": {
+                "color": "#E6E6FA"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

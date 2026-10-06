@@ -1,0 +1,14 @@
+/// What-if: retention cost per targeted customer
+table Param_Cost_per_Customer
+	lineageTag: 275037d7-7780-473e-b26a-16b0a9118b25
+
+	column 'Cost per Targeted Customer'
+		formatString: $#,0
+		lineageTag: e2d2ac21-d441-4c2d-a29d-0901a94b96a2
+		isNameInferred
+		sourceColumn: [Cost per Targeted Customer]
+
+	partition Param_Cost_per_Customer = calculated
+		mode: import
+		source = SELECTCOLUMNS( GENERATESERIES( 10, 300, 10 ), "Cost per Targeted Customer", [Value] )
+

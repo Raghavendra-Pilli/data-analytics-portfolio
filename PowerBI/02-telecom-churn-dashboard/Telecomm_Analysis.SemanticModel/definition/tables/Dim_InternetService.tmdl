@@ -1,0 +1,34 @@
+table Dim_InternetService
+	lineageTag: 711d927e-3fe2-4eeb-97d6-bfbfcb5bb880
+
+	column 'Internet Key'
+		dataType: int64
+		isHidden
+		lineageTag: 2b523324-fcac-42a7-bcb6-0be1b0b8aab8
+		sourceColumn: Internet Key
+
+	column InternetService
+		dataType: string
+		lineageTag: dc5d96a6-fd0a-481f-9756-3e41098cdf22
+		sourceColumn: InternetService
+
+	column 'Has Internet'
+		dataType: string
+		lineageTag: e96c9721-137f-4dd6-af34-a6bb9dbc01be
+		sourceColumn: Has Internet
+
+	partition Dim_InternetService = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRecords({
+				        [#"Internet Key" = 1, InternetService = "DSL", #"Has Internet" = "Yes"],
+				        [#"Internet Key" = 2, InternetService = "Fiber optic", #"Has Internet" = "Yes"],
+				        [#"Internet Key" = 3, InternetService = "No", #"Has Internet" = "No"]
+				    }),
+				    #"Changed Type" = Table.TransformColumnTypes(Source, {{"Internet Key", Int64.Type}, {"InternetService", type text}, {"Has Internet", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

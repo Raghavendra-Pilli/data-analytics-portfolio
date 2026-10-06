@@ -1,0 +1,19 @@
+/// Disconnected steps for the monthly revenue waterfall
+table Revenue_Bridge
+	lineageTag: ac9e1694-3623-4a94-8be2-b4516219f106
+
+	column Step
+		lineageTag: 9c70079d-9ea2-4707-9e14-853fbb38d6c0
+		isNameInferred
+		sourceColumn: [Step]
+		sortByColumn: 'Step Order'
+
+	column 'Step Order'
+		lineageTag: 918bc1b3-e45f-4151-8905-047d7e0fd6fb
+		isNameInferred
+		sourceColumn: [Step Order]
+
+	partition Revenue_Bridge = calculated
+		mode: import
+		source = DATATABLE( "Step", STRING, "Step Order", INTEGER, { {"Total Monthly Revenue",1}, {"Month-to-month churn",2}, {"One-year churn",3}, {"Two-year churn",4} } )
+

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Telecomm_Analysis"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "3668132e-9845-4a4a-a083-7504e478f697"
+  }
+}

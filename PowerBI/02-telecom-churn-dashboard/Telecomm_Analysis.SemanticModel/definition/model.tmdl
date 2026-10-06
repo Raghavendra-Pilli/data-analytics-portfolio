@@ -1,0 +1,29 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-IN
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["Dim_Contract","Dim_PaymentMethod","Dim_InternetService","Dim_TenureBand","Fact_Customers"]
+
+annotation PBI_ProTooling = ["MCP-PBIModeling","DevMode"]
+
+ref table Dim_Contract
+ref table Dim_PaymentMethod
+ref table Dim_InternetService
+ref table Dim_TenureBand
+ref table Fact_Customers
+ref table Service_Usage
+ref table Revenue_Bridge
+ref table Param_Success_Rate
+ref table Param_Cost_per_Customer
+ref table Param_Coverage
+ref table Param_Horizon
+
+ref cultureInfo en-US
+

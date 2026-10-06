@@ -1,0 +1,100 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 50,
+            "y": 371.772364724583
+          },
+          "nodeIndex": "Dim_Contract",
+          "nodeLineageTag": "2faec2e1-c1a8-4b60-8240-149d001da376",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 466.59080430779625,
+            "y": 526.41494986159069
+          },
+          "nodeIndex": "Dim_InternetService",
+          "nodeLineageTag": "711d927e-3fe2-4eeb-97d6-bfbfcb5bb880",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 618.41380766789564,
+            "y": 78.355748801162235
+          },
+          "nodeIndex": "Dim_PaymentMethod",
+          "nodeLineageTag": "175466a9-586d-466c-b482-0df37e3bdb8e",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 194.24051583291455,
+            "y": -50
+          },
+          "nodeIndex": "Dim_TenureBand",
+          "nodeLineageTag": "d28766dd-7999-46ea-9125-7de332d4a129",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 334.21157036419737,
+            "y": 176.21398435093693
+          },
+          "nodeIndex": "Fact_Customers",
+          "nodeLineageTag": "e391d52c-b790-4b7a-9ec6-4a4534e08982",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 852.41380766789564,
+            "y": 288.20747493079534
+          },
+          "nodeIndex": "Service_Usage",
+          "nodeLineageTag": "95163e7e-4521-4111-af37-fd24ae64674a",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

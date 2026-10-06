@@ -1,0 +1,343 @@
+table Fact_Customers
+	lineageTag: e391d52c-b790-4b7a-9ec6-4a4534e08982
+
+	/// Total number of customers
+	measure 'Total Customers' = COUNTROWS( Fact_Customers )
+		formatString: #,0
+		lineageTag: a5b39dcc-e0b0-473a-a14f-76914c7640bc
+
+	/// Number of churned customers
+	measure 'Total Churned' = SUM( Fact_Customers[Is Churned] )
+		formatString: #,0
+		lineageTag: 8b3a5800-4065-4da3-a2cb-dd4e0aed890f
+
+	/// Churned / Total × 100
+	measure 'Churn Rate %' = DIVIDE( [Total Churned], [Total Customers] )
+		formatString: 0.0%
+		lineageTag: 7b8030e8-a3a1-4d82-9567-6f6278a4a805
+
+	/// Number of retained customers
+	measure 'Retained Customers' = [Total Customers] - [Total Churned]
+		formatString: #,0
+		lineageTag: 02193b48-d717-4b91-8d8c-aa30d6b98a85
+
+	/// Sum of monthly charges for churned customers
+	measure 'Revenue at Risk' = CALCULATE( SUM( Fact_Customers[MonthlyCharges] ), Fact_Customers[Churn] = "Yes" )
+		formatString: $#,0.00
+		lineageTag: 60da6bea-bc70-40aa-8bc9-a266ef4de81b
+
+	/// Average monthly charge for churned customers
+	measure 'Avg Monthly Charge (Churners)' = CALCULATE( AVERAGE( Fact_Customers[MonthlyCharges] ), Fact_Customers[Churn] = "Yes" )
+		formatString: $#,0.00
+		lineageTag: f2fa417e-5b91-41fe-a56f-67cb3c9d57ea
+
+	/// Average tenure in months for churned customers
+	measure 'Avg Tenure (Churners)' = CALCULATE( AVERAGE( Fact_Customers[tenure] ), Fact_Customers[Churn] = "Yes" )
+		formatString: 0.0
+		lineageTag: e3785dfb-6777-4867-a734-e4387779a834
+
+	/// Average tenure in months for retained customers
+	measure 'Avg Tenure (Retained)' = CALCULATE( AVERAGE( Fact_Customers[tenure] ), Fact_Customers[Churn] = "No" )
+		formatString: 0.0
+		lineageTag: be9bf297-35d9-4b83-a7ca-7f05e1bb8d14
+
+	/// Churn rate among senior citizens
+	measure 'Senior Citizen Churn Rate %' =
+			DIVIDE(
+			    CALCULATE( [Total Churned], Fact_Customers[SeniorCitizen] = 1 ),
+			    CALCULATE( [Total Customers], Fact_Customers[SeniorCitizen] = 1 )
+			)
+		formatString: 0.0%
+		lineageTag: 02938167-2756-4fff-a951-4aec686dd1f6
+
+	/// Churn rate for month-to-month contract customers
+	measure 'MTM Churn Rate %' =
+			DIVIDE(
+			    CALCULATE( [Total Churned], Dim_Contract[Contract] = "Month-to-month" ),
+			    CALCULATE( [Total Customers], Dim_Contract[Contract] = "Month-to-month" )
+			)
+		formatString: 0.0%
+		lineageTag: d1c8d9ee-cbf6-4192-ba7d-f4f21477b589
+
+	/// Churn rate for fiber optic internet customers
+	measure 'Fiber Optic Churn Rate %' =
+			DIVIDE(
+			    CALCULATE( [Total Churned], Dim_InternetService[InternetService] = "Fiber optic" ),
+			    CALCULATE( [Total Customers], Dim_InternetService[InternetService] = "Fiber optic" )
+			)
+		formatString: 0.0%
+		lineageTag: 9306378e-c509-4f87-9993-9517b3916263
+
+	/// Sum of monthly charges, all customers
+	measure 'Total Monthly Revenue' = SUM( Fact_Customers[MonthlyCharges] )
+		formatString: $#,0
+		lineageTag: 16db2326-707a-46f0-adb6-324511238b5d
+
+	/// Monthly charges from retained customers
+	measure 'Retained Monthly Revenue' = [Total Monthly Revenue] - [Revenue at Risk]
+		formatString: $#,0
+		lineageTag: faecb8a3-58cd-4bb5-9494-a45f898e2f8e
+
+	/// Share of monthly revenue lost to churn
+	measure 'Revenue at Risk %' = DIVIDE( [Revenue at Risk], [Total Monthly Revenue] )
+		formatString: 0.0%
+		lineageTag: b23039b4-d2d7-4a5e-a16c-70f4f9a343db
+
+	/// Monthly revenue at risk x 12
+	measure 'Annualized Revenue at Risk' = [Revenue at Risk] * 12
+		formatString: $#,0
+		lineageTag: 267c1029-8e26-4cd4-94c9-da68ff69785e
+
+	/// Average monthly charge, retained customers
+	measure 'Avg Monthly Charge (Retained)' = CALCULATE( AVERAGE( Fact_Customers[MonthlyCharges] ), Fact_Customers[Churn] = "No" )
+		formatString: $#,0.00
+		lineageTag: 9cdd27a2-dee5-40df-ac4e-12668ce7ab9f
+
+	/// Segment contribution to total revenue at risk
+	measure 'Share of Revenue at Risk %' = DIVIDE( [Revenue at Risk], CALCULATE( [Revenue at Risk], ALLSELECTED() ) )
+		formatString: 0.0%
+		lineageTag: c27e159a-1786-4e88-9e28-86507ceb73d8
+
+	/// Waterfall values: total monthly revenue, then churned revenue by contract (negative)
+	measure 'Revenue Bridge Value' = SWITCH( SELECTEDVALUE( Revenue_Bridge[Step] ), "Total Monthly Revenue", [Total Monthly Revenue], "Month-to-month churn", -CALCULATE( [Revenue at Risk], KEEPFILTERS( Dim_Contract[Contract] = "Month-to-month" ) ), "One-year churn", -CALCULATE( [Revenue at Risk], KEEPFILTERS( Dim_Contract[Contract] = "One year" ) ), "Two-year churn", -CALCULATE( [Revenue at Risk], KEEPFILTERS( Dim_Contract[Contract] = "Two year" ) ) )
+		formatString: $#,0
+		lineageTag: 0859268c-7d72-427e-a11d-96805cc45e26
+
+	/// What-if assumption (default 20% when nothing selected)
+	measure 'Success Rate Assumption' = SELECTEDVALUE( Param_Success_Rate[Success Rate], 0.2 )
+		formatString: 0%
+		lineageTag: ad24fed8-783e-480a-9bee-e8db79e11521
+
+	/// What-if assumption (default $50)
+	measure 'Cost per Customer Assumption' = SELECTEDVALUE( Param_Cost_per_Customer[Cost per Targeted Customer], 50 )
+		formatString: $#,0
+		lineageTag: 7fced0e3-62c0-4530-8a3d-93ef2db05b91
+
+	/// What-if assumption (default 100%)
+	measure 'Coverage Assumption' = SELECTEDVALUE( Param_Coverage[Coverage], 1 )
+		formatString: 0%
+		lineageTag: 77c073b6-81cd-4c15-92e8-2e0481f46da6
+
+	/// What-if assumption (default 12 months)
+	measure 'Horizon Assumption' = SELECTEDVALUE( Param_Horizon[Horizon (Months)], 12 )
+		formatString: 0
+		lineageTag: dcf8b4ba-b318-46f4-ad30-529ec45e393b
+
+	/// Churn-exposed customers included in the retention program
+	measure 'Customers Targeted' = [Total Churned] * [Coverage Assumption]
+		formatString: #,0
+		lineageTag: 4245323a-4cc5-463c-b58f-9853527f220a
+
+	/// Targeted customers x cost per customer
+	measure 'Retention Cost (Est.)' = [Customers Targeted] * [Cost per Customer Assumption]
+		formatString: $#,0
+		lineageTag: 89a6ae3a-180f-4ba8-9003-df829f492be9
+
+	/// Targeted customers x success rate
+	measure 'Customers Retained (Est.)' = [Customers Targeted] * [Success Rate Assumption]
+		formatString: #,0
+		lineageTag: b1eca452-2dae-4f77-bbd3-bef59345aa4a
+
+	/// Monthly revenue at risk x coverage x success x horizon months
+	measure 'Revenue Retained (Est.)' = [Revenue at Risk] * [Coverage Assumption] * [Success Rate Assumption] * [Horizon Assumption]
+		formatString: $#,0
+		lineageTag: b0e08e60-0660-4dd3-85a2-85d104f3fdee
+
+	/// Revenue retained less retention cost
+	measure 'Net Benefit (Est.)' = [Revenue Retained (Est.)] - [Retention Cost (Est.)]
+		formatString: $#,0;-$#,0
+		lineageTag: 85f21883-fce3-4d00-8515-ff86dbac2631
+
+	/// Net benefit / retention cost
+	measure 'Retention ROI (Est.)' = DIVIDE( [Net Benefit (Est.)], [Retention Cost (Est.)] )
+		formatString: 0%;-0%
+		lineageTag: d2fd64dd-2eee-475c-b964-975bfef935a8
+
+	/// Text summary of active what-if assumptions
+	measure 'Assumptions Used' = "Success " & FORMAT( [Success Rate Assumption], "0%" ) & " | Cost $" & FORMAT( [Cost per Customer Assumption], "#,0" ) & " | Coverage " & FORMAT( [Coverage Assumption], "0%" ) & " | " & [Horizon Assumption] & " months"
+		lineageTag: 6b3d10a0-2469-402a-833f-93072970d96b
+
+	column 'Customer Key'
+		dataType: int64
+		isHidden
+		lineageTag: 150b9fef-7a94-43fe-938a-54cf85719a74
+		sourceColumn: Customer Key
+
+	column customerID
+		dataType: string
+		lineageTag: 6aec47ba-e5b4-44cc-b4f5-f2385fe1397b
+		sourceColumn: customerID
+
+	column 'Contract Key'
+		dataType: int64
+		isHidden
+		lineageTag: 0a9c36d5-d25e-4616-b711-6659b08098ce
+		sourceColumn: Contract Key
+
+	column 'Payment Key'
+		dataType: int64
+		isHidden
+		lineageTag: 7e0d3c97-d8a3-44ef-910f-40d97d809ff3
+		sourceColumn: Payment Key
+
+	column 'Internet Key'
+		dataType: int64
+		isHidden
+		lineageTag: 4d0dcc50-efe4-4558-829b-50b50952303e
+		sourceColumn: Internet Key
+
+	column 'Tenure Band Key'
+		dataType: int64
+		isHidden
+		lineageTag: 6e279083-7d1e-49f7-a1ef-279f60fe4dcb
+		sourceColumn: Tenure Band Key
+
+	column tenure
+		dataType: int64
+		lineageTag: 0925fdeb-5f1a-4d47-a430-9cf845ea65a1
+		sourceColumn: tenure
+
+	column MonthlyCharges
+		dataType: double
+		lineageTag: 0cf8a768-c3c4-4f5c-8e80-e63616b410df
+		summarizeBy: sum
+		sourceColumn: MonthlyCharges
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TotalCharges
+		dataType: string
+		lineageTag: 58eb36dd-fb49-4004-b509-7cbd5e736f3f
+		summarizeBy: none
+		sourceColumn: TotalCharges
+
+		annotation SummarizationSetBy = Automatic
+
+	column PhoneService
+		dataType: string
+		lineageTag: bfce2e20-0c5d-48a3-8fcc-d45c0f42d880
+		sourceColumn: PhoneService
+
+	column MultipleLines
+		dataType: string
+		lineageTag: a0d472bb-d0c5-4bbf-ab8e-67a14245f1c7
+		sourceColumn: MultipleLines
+
+	column OnlineSecurity
+		dataType: string
+		lineageTag: f404efa2-cb7c-4634-8441-067c8996e6eb
+		sourceColumn: OnlineSecurity
+
+	column OnlineBackup
+		dataType: string
+		lineageTag: 1210457b-e3cc-4834-89fd-dc485b46e34d
+		sourceColumn: OnlineBackup
+
+	column DeviceProtection
+		dataType: string
+		lineageTag: 0fc81449-5bd6-4a36-a76c-defe5a8f56bb
+		sourceColumn: DeviceProtection
+
+	column TechSupport
+		dataType: string
+		lineageTag: 261fe3f9-52e6-4958-93a0-5b75020acdd3
+		sourceColumn: TechSupport
+
+	column StreamingTV
+		dataType: string
+		lineageTag: 639fffc5-97c8-4e4b-9f4a-4fb74faabd19
+		sourceColumn: StreamingTV
+
+	column StreamingMovies
+		dataType: string
+		lineageTag: 2373455b-f9ad-4a76-a52c-76ea6b7d1ea3
+		sourceColumn: StreamingMovies
+
+	column PaperlessBilling
+		dataType: string
+		lineageTag: b3567333-b4bb-44c0-93f4-f960cc5a6eb2
+		sourceColumn: PaperlessBilling
+
+	column Churn
+		dataType: string
+		lineageTag: ac6b1141-83b6-4b43-b379-7b843d7919d2
+		sourceColumn: Churn
+
+	column 'Is Churned'
+		dataType: int64
+		lineageTag: 2e6e0ed2-cfff-4ce1-9709-3d02f3206338
+		sourceColumn: Is Churned
+
+	column gender
+		dataType: string
+		lineageTag: 451e2f80-52f7-4536-b072-fcc49dc862ce
+		sourceColumn: gender
+
+	column SeniorCitizen
+		dataType: int64
+		lineageTag: 7f6c665c-5033-458e-a156-98adc7d996f6
+		sourceColumn: SeniorCitizen
+
+	column Partner
+		dataType: string
+		lineageTag: 5eb4ed31-122e-41ee-8f10-7cb922cf4c57
+		sourceColumn: Partner
+
+	column Dependents
+		dataType: string
+		lineageTag: f8540954-896a-47c8-acc8-89d0d02db955
+		sourceColumn: Dependents
+
+	column 'Service Count'
+		dataType: int64
+		lineageTag: 22c2660b-f43c-46a5-9ada-0d45f29e5f5d
+		sourceColumn: Service Count
+
+	column 'Has Premium Services'
+		dataType: string
+		lineageTag: fef0f9c7-8bca-4c97-8426-87c4aa31d4ad
+		sourceColumn: Has Premium Services
+
+	/// Senior / Non-Senior label for SeniorCitizen flag
+	column 'Senior Citizen Status' = IF( Fact_Customers[SeniorCitizen] = 1, "Senior", "Non-Senior" )
+		dataType: string
+		lineageTag: 0207a950-45d5-4d40-a6b7-f4eefaa1abe7
+
+	/// Senior status x partner x dependents profile
+	column 'Customer Profile' = Fact_Customers[Senior Citizen Status] & " | " & IF( Fact_Customers[Partner] = "Yes", "Partner", "No partner" ) & " | " & IF( Fact_Customers[Dependents] = "Yes", "Dependents", "No dependents" )
+		dataType: string
+		lineageTag: 5e4f3b53-7b99-48d7-b2ea-b039300f74ac
+
+	column 'Security Bundle' = SWITCH( TRUE(), Fact_Customers[OnlineSecurity] = "No internet service", "No internet", Fact_Customers[OnlineSecurity] = "Yes" && Fact_Customers[TechSupport] = "Yes", "Security + Tech Support", Fact_Customers[OnlineSecurity] = "Yes", "Security only", Fact_Customers[TechSupport] = "Yes", "Tech Support only", "No protection" )
+		dataType: string
+		lineageTag: 70d066fb-be4d-4541-84ad-c9cb3b9fa1e9
+
+	column 'Streaming Bundle' = SWITCH( TRUE(), Fact_Customers[StreamingTV] = "No internet service", "No internet", Fact_Customers[StreamingTV] = "Yes" && Fact_Customers[StreamingMovies] = "Yes", "TV + Movies", Fact_Customers[StreamingTV] = "Yes", "TV only", Fact_Customers[StreamingMovies] = "Yes", "Movies only", "No streaming" )
+		dataType: string
+		lineageTag: fe138438-68d3-4786-9b72-d5d100a701aa
+
+	partition Fact_Customers = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\pragh\data-analytics-portfolio\PowerBI\02-telecom-churn-dashboard\data\WA_Fn-UseC_-Telco-Customer-Churn.csv"), [Delimiter = ",", Columns = 21, QuoteStyle = QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers", {{"customerID", type text}, {"gender", type text}, {"SeniorCitizen", Int64.Type}, {"Partner", type text}, {"Dependents", type text}, {"tenure", Int64.Type}, {"PhoneService", type text}, {"MultipleLines", type text}, {"InternetService", type text}, {"OnlineSecurity", type text}, {"OnlineBackup", type text}, {"DeviceProtection", type text}, {"TechSupport", type text}, {"StreamingTV", type text}, {"StreamingMovies", type text}, {"Contract", type text}, {"PaperlessBilling", type text}, {"PaymentMethod", type text}, {"MonthlyCharges", type number}, {"TotalCharges", type number}, {"Churn", type text}}, "en-US"),
+				    #"Replace TotalCharges Nulls" = Table.ReplaceValue(#"Changed Type", null, each [MonthlyCharges] * [tenure], Replacer.ReplaceValue, {"TotalCharges"}),
+				    #"Clean Service Columns" = Table.TransformColumns(#"Replace TotalCharges Nulls", {{"OnlineSecurity", each if _ = "No internet service" then "No" else _, type text}, {"OnlineBackup", each if _ = "No internet service" then "No" else _, type text}, {"DeviceProtection", each if _ = "No internet service" then "No" else _, type text}, {"TechSupport", each if _ = "No internet service" then "No" else _, type text}, {"StreamingTV", each if _ = "No internet service" then "No" else _, type text}, {"StreamingMovies", each if _ = "No internet service" then "No" else _, type text}, {"MultipleLines", each if _ = "No phone service" then "No" else _, type text}}),
+				    #"Add Is Churned" = Table.AddColumn(#"Clean Service Columns", "Is Churned", each if [Churn] = "Yes" then 1 else 0, Int64.Type),
+				    #"Add Tenure Band Key" = Table.AddColumn(#"Add Is Churned", "Tenure Band Key", each if [tenure] <= 12 then 1 else if [tenure] <= 24 then 2 else if [tenure] <= 36 then 3 else if [tenure] <= 48 then 4 else if [tenure] <= 60 then 5 else 6, Int64.Type),
+				    #"Add Contract Key" = Table.AddColumn(#"Add Tenure Band Key", "Contract Key", each if [Contract] = "Month-to-month" then 1 else if [Contract] = "One year" then 2 else 3, Int64.Type),
+				    #"Add Payment Key" = Table.AddColumn(#"Add Contract Key", "Payment Key", each if [PaymentMethod] = "Electronic check" then 1 else if [PaymentMethod] = "Mailed check" then 2 else if [PaymentMethod] = "Bank transfer (automatic)" then 3 else 4, Int64.Type),
+				    #"Add Internet Key" = Table.AddColumn(#"Add Payment Key", "Internet Key", each if [InternetService] = "DSL" then 1 else if [InternetService] = "Fiber optic" then 2 else 3, Int64.Type),
+				    #"Add Service Count" = Table.AddColumn(#"Add Internet Key", "Service Count", each List.Count(List.Select({[PhoneService], [MultipleLines], [OnlineSecurity], [OnlineBackup], [DeviceProtection], [TechSupport], [StreamingTV], [StreamingMovies]}, each _ = "Yes")), Int64.Type),
+				    #"Add Has Premium Services" = Table.AddColumn(#"Add Service Count", "Has Premium Services", each if [OnlineSecurity] = "Yes" or [TechSupport] = "Yes" then "Yes" else "No", type text),
+				    #"Add Customer Key" = Table.AddIndexColumn(#"Add Has Premium Services", "Customer Key", 1, 1, Int64.Type),
+				    #"Reorder Columns" = Table.SelectColumns(#"Add Customer Key", {"Customer Key", "customerID", "Contract Key", "Payment Key", "Internet Key", "Tenure Band Key", "tenure", "MonthlyCharges", "TotalCharges", "PhoneService", "MultipleLines", "OnlineSecurity", "OnlineBackup", "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies", "PaperlessBilling", "Churn", "Is Churned", "gender", "SeniorCitizen", "Partner", "Dependents", "Service Count", "Has Premium Services"})
+				in
+				    #"Reorder Columns"
+
+	annotation PBI_ResultType = Table
+

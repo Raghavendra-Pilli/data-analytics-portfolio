@@ -1,0 +1,14 @@
+/// What-if: share of targeted churn-exposed customers retained
+table Param_Success_Rate
+	lineageTag: 36f9ccde-1194-4aaf-8d86-3256c4ee4374
+
+	column 'Success Rate'
+		formatString: 0%
+		lineageTag: 2ea04477-abf7-49dc-9c8a-d69e74785387
+		isNameInferred
+		sourceColumn: [Success Rate]
+
+	partition Param_Success_Rate = calculated
+		mode: import
+		source = SELECTCOLUMNS( GENERATESERIES( 0.05, 0.6, 0.05 ), "Success Rate", ROUND( [Value], 2 ) )
+

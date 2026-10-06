@@ -1,0 +1,33 @@
+/// Unpivoted service subscriptions: one row per customer per service
+table Service_Usage
+	lineageTag: 95163e7e-4521-4111-af37-fd24ae64674a
+
+	column 'Customer Key'
+		lineageTag: 90e5fd35-9477-487b-8953-b8e087f433bb
+		isNameInferred
+		sourceColumn: [Customer Key]
+
+	column Service
+		lineageTag: c83e86ec-d0ce-43cc-81e2-3f870706f38f
+		isNameInferred
+		sourceColumn: [Service]
+
+	column Status
+		lineageTag: 59fa9ebc-b506-4036-a39a-ec12f67d28c6
+		isNameInferred
+		sourceColumn: [Status]
+
+	partition Service_Usage = calculated
+		mode: import
+		source =
+				UNION(
+				SELECTCOLUMNS(Fact_Customers,"Customer Key",Fact_Customers[Customer Key],"Service","Phone Service","Status",SWITCH(Fact_Customers[PhoneService],"Yes","Subscribed","No","Not subscribed",Fact_Customers[PhoneService])),
+				SELECTCOLUMNS(Fact_Customers,"Customer Key",Fact_Customers[Customer Key],"Service","Multiple Lines","Status",SWITCH(Fact_Customers[MultipleLines],"Yes","Subscribed","No","Not subscribed",Fact_Customers[MultipleLines])),
+				SELECTCOLUMNS(Fact_Customers,"Customer Key",Fact_Customers[Customer Key],"Service","Online Security","Status",SWITCH(Fact_Customers[OnlineSecurity],"Yes","Subscribed","No","Not subscribed",Fact_Customers[OnlineSecurity])),
+				SELECTCOLUMNS(Fact_Customers,"Customer Key",Fact_Customers[Customer Key],"Service","Online Backup","Status",SWITCH(Fact_Customers[OnlineBackup],"Yes","Subscribed","No","Not subscribed",Fact_Customers[OnlineBackup])),
+				SELECTCOLUMNS(Fact_Customers,"Customer Key",Fact_Customers[Customer Key],"Service","Device Protection","Status",SWITCH(Fact_Customers[DeviceProtection],"Yes","Subscribed","No","Not subscribed",Fact_Customers[DeviceProtection])),
+				SELECTCOLUMNS(Fact_Customers,"Customer Key",Fact_Customers[Customer Key],"Service","Tech Support","Status",SWITCH(Fact_Customers[TechSupport],"Yes","Subscribed","No","Not subscribed",Fact_Customers[TechSupport])),
+				SELECTCOLUMNS(Fact_Customers,"Customer Key",Fact_Customers[Customer Key],"Service","Streaming TV","Status",SWITCH(Fact_Customers[StreamingTV],"Yes","Subscribed","No","Not subscribed",Fact_Customers[StreamingTV])),
+				SELECTCOLUMNS(Fact_Customers,"Customer Key",Fact_Customers[Customer Key],"Service","Streaming Movies","Status",SWITCH(Fact_Customers[StreamingMovies],"Yes","Subscribed","No","Not subscribed",Fact_Customers[StreamingMovies]))
+				)
+

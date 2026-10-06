@@ -1,0 +1,14 @@
+/// What-if: months of revenue counted for retained customers
+table Param_Horizon
+	lineageTag: 16f43431-0845-4ce4-b6a9-e720d238eb08
+
+	column 'Horizon (Months)'
+		formatString: 0
+		lineageTag: 2109a650-58a7-48f3-be33-37804d7b9428
+		isNameInferred
+		sourceColumn: [Horizon (Months)]
+
+	partition Param_Horizon = calculated
+		mode: import
+		source = SELECTCOLUMNS( GENERATESERIES( 3, 36, 3 ), "Horizon (Months)", [Value] )
+

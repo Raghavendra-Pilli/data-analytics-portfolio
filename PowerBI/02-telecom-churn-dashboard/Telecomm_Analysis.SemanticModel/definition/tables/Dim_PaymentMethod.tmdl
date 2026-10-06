@@ -1,0 +1,40 @@
+table Dim_PaymentMethod
+	lineageTag: 175466a9-586d-466c-b482-0df37e3bdb8e
+
+	column 'Payment Key'
+		dataType: int64
+		isHidden
+		lineageTag: 39078b29-41ff-40f7-a68a-4fe0669c6963
+		sourceColumn: Payment Key
+
+	column PaymentMethod
+		dataType: string
+		lineageTag: 6aff958d-f73c-4f4b-be36-0eda6c308dc4
+		sourceColumn: PaymentMethod
+
+	column 'Payment Short'
+		dataType: string
+		lineageTag: b9138f91-0ffd-4a93-b8b6-caef80f6b2a9
+		sourceColumn: Payment Short
+
+	column 'Payment Type'
+		dataType: string
+		lineageTag: 6cb0f474-2c49-4893-bbcb-ac171d806be5
+		sourceColumn: Payment Type
+
+	partition Dim_PaymentMethod = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRecords({
+				        [#"Payment Key" = 1, PaymentMethod = "Electronic check", #"Payment Short" = "E-Check", #"Payment Type" = "Manual"],
+				        [#"Payment Key" = 2, PaymentMethod = "Mailed check", #"Payment Short" = "Mail", #"Payment Type" = "Manual"],
+				        [#"Payment Key" = 3, PaymentMethod = "Bank transfer (automatic)", #"Payment Short" = "Bank", #"Payment Type" = "Automatic"],
+				        [#"Payment Key" = 4, PaymentMethod = "Credit card (automatic)", #"Payment Short" = "Card", #"Payment Type" = "Automatic"]
+				    }),
+				    #"Changed Type" = Table.TransformColumnTypes(Source, {{"Payment Key", Int64.Type}, {"PaymentMethod", type text}, {"Payment Short", type text}, {"Payment Type", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

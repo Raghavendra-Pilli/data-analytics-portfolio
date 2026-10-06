@@ -1,0 +1,39 @@
+table Dim_Contract
+	lineageTag: 2faec2e1-c1a8-4b60-8240-149d001da376
+
+	column 'Contract Key'
+		dataType: int64
+		isHidden
+		lineageTag: ace3fb9f-7b66-4a99-a7e0-d42e094e19b0
+		sourceColumn: Contract Key
+
+	column Contract
+		dataType: string
+		lineageTag: 86145516-9382-44f5-a07e-619efcf4edf4
+		sourceColumn: Contract
+
+	column 'Contract Short'
+		dataType: string
+		lineageTag: accc15fa-8f5f-4ca3-8054-d64d8f48cf7f
+		sourceColumn: Contract Short
+
+	column 'Contract Risk'
+		dataType: string
+		lineageTag: bb37f543-df28-41c5-b00d-9a4a5c306ac2
+		sourceColumn: Contract Risk
+
+	partition Dim_Contract = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRecords({
+				        [#"Contract Key" = 1, Contract = "Month-to-month", #"Contract Short" = "MTM", #"Contract Risk" = "High"],
+				        [#"Contract Key" = 2, Contract = "One year", #"Contract Short" = "1Y", #"Contract Risk" = "Medium"],
+				        [#"Contract Key" = 3, Contract = "Two year", #"Contract Short" = "2Y", #"Contract Risk" = "Low"]
+				    }),
+				    #"Changed Type" = Table.TransformColumnTypes(Source, {{"Contract Key", Int64.Type}, {"Contract", type text}, {"Contract Short", type text}, {"Contract Risk", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

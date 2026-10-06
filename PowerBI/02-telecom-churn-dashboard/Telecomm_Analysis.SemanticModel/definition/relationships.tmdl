@@ -1,0 +1,21 @@
+relationship 'Fact_Customers_Contract Key_Dim_Contract_Contract Key'
+	fromColumn: Fact_Customers.'Contract Key'
+	toColumn: Dim_Contract.'Contract Key'
+
+relationship 'Fact_Customers_Payment Key_Dim_PaymentMethod_Payment Key'
+	fromColumn: Fact_Customers.'Payment Key'
+	toColumn: Dim_PaymentMethod.'Payment Key'
+
+relationship 'Fact_Customers_Internet Key_Dim_InternetService_Internet Key'
+	fromColumn: Fact_Customers.'Internet Key'
+	toColumn: Dim_InternetService.'Internet Key'
+
+relationship 'Fact_Customers_Tenure Band Key_Dim_TenureBand_Tenure Band Key'
+	fromColumn: Fact_Customers.'Tenure Band Key'
+	toColumn: Dim_TenureBand.'Tenure Band Key'
+
+relationship Service_Usage_to_Fact
+	crossFilteringBehavior: bothDirections
+	fromColumn: Service_Usage.'Customer Key'
+	toColumn: Fact_Customers.'Customer Key'
+

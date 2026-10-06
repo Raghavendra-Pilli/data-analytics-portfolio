@@ -1,0 +1,14 @@
+/// What-if: share of churn-exposed customers targeted
+table Param_Coverage
+	lineageTag: 3f4beb4b-3176-4844-af4e-436367a26c63
+
+	column Coverage
+		formatString: 0%
+		lineageTag: e3126f3d-be1d-400c-a976-e79d3238f80b
+		isNameInferred
+		sourceColumn: [Coverage]
+
+	partition Param_Coverage = calculated
+		mode: import
+		source = SELECTCOLUMNS( GENERATESERIES( 0.1, 1, 0.1 ), "Coverage", ROUND( [Value], 1 ) )
+

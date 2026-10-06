@@ -1,0 +1,42 @@
+table Dim_TenureBand
+	lineageTag: d28766dd-7999-46ea-9125-7de332d4a129
+
+	column 'Tenure Band Key'
+		dataType: int64
+		isHidden
+		lineageTag: 12384ae0-5ea9-46e7-85f5-f968ff76c243
+		sourceColumn: Tenure Band Key
+
+	column 'Tenure Band'
+		dataType: string
+		lineageTag: 590a5e75-0be6-418a-bad8-847f301b0d7c
+		sourceColumn: Tenure Band
+
+	column 'Tenure Band Sort'
+		dataType: int64
+		lineageTag: ae6c72bc-88fa-493e-91c9-dedc394d2201
+		sourceColumn: Tenure Band Sort
+
+	column 'Tenure Group'
+		dataType: string
+		lineageTag: 95c844a2-abb5-4c70-99ed-22f2965ab817
+		sourceColumn: Tenure Group
+
+	partition Dim_TenureBand = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRecords({
+				        [#"Tenure Band Key" = 1, #"Tenure Band" = "0-12", #"Tenure Band Sort" = 1, #"Tenure Group" = "New"],
+				        [#"Tenure Band Key" = 2, #"Tenure Band" = "13-24", #"Tenure Band Sort" = 2, #"Tenure Group" = "Developing"],
+				        [#"Tenure Band Key" = 3, #"Tenure Band" = "25-36", #"Tenure Band Sort" = 3, #"Tenure Group" = "Established"],
+				        [#"Tenure Band Key" = 4, #"Tenure Band" = "37-48", #"Tenure Band Sort" = 4, #"Tenure Group" = "Established"],
+				        [#"Tenure Band Key" = 5, #"Tenure Band" = "49-60", #"Tenure Band Sort" = 5, #"Tenure Group" = "Loyal"],
+				        [#"Tenure Band Key" = 6, #"Tenure Band" = "61+", #"Tenure Band Sort" = 6, #"Tenure Group" = "Loyal"]
+				    }),
+				    #"Changed Type" = Table.TransformColumnTypes(Source, {{"Tenure Band Key", Int64.Type}, {"Tenure Band", type text}, {"Tenure Band Sort", Int64.Type}, {"Tenure Group", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
